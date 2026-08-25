@@ -1,4 +1,8 @@
-# ferry
+# ferry 🚢
+
+[![CI](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml/badge.svg)](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-3fb950.svg)](LICENSE)
+![Bundle size](https://img.shields.io/badge/gzipped-%3C2_kB-2f81f7)
 
 `import {copyToClipboard} from 'ferry'`
 
@@ -8,6 +12,19 @@ Built and managed with [bun](https://bun.sh).
 Ships dual **ESM + CJS** bundles with TypeScript declarations — works with `import`, `require()`, bundlers, and CDNs.
 
 🎮 **[Try the live playground →](https://cleverprogramer.github.io/ferry/)**
+
+## Browser support
+
+| API | Chrome | Edge | Firefox | Safari |
+|---|---|---|---|---|
+| `copyToClipboard` (async API) | ✅ 66+ | ✅ 79+ | ✅ 63+ | ✅ 13.1+ |
+| `copyToClipboard` rich slots (`{html, text}`) | ✅ 66+ | ✅ 79+ | ✅ 63+ | ✅ 13.1+ |
+| `isSupported`, `clear`, `copyJson`, `copyElement` | ✅ | ✅ | ✅ | ✅ |
+| `readText` | ✅ 66+ | ✅ 79+ | ✅ 125+ | ✅ 13.1+ |
+| `copyImage` / `readImage` (ClipboardItem) | ✅ 76+ | ✅ 79+ | ⚠️ limited | ✅ 13.1+ |
+| `readFiles` | ✅ 76+ | ✅ 79+ | ⚠️ limited | ⚠️ partial |
+
+All browsers fall back to the hidden-textarea `execCommand('copy')` path automatically where the async Clipboard API is unavailable. Clipboard **read** APIs additionally require a secure context (HTTPS/localhost) and, in some browsers, explicit user permission.
 
 ## Install
 
