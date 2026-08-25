@@ -55,6 +55,13 @@ if (!isSupported()) {
 }
 ```
 
+### `clear(): Promise<void>`
+Overwrites the clipboard with an empty string. Rejects where the async Clipboard API is unavailable or denied.
+
+```ts
+await clear();
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:

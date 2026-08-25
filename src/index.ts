@@ -173,3 +173,28 @@ export const copyImage = async (source: Blob | string): Promise<void> => {
   }
 };
 
+/**
+ * Overwrites the clipboard with an empty string, effectively wiping it.
+ * Requires the async Clipboard API; rejects where unavailable.
+ */
+export const clear = async (): Promise<void> => {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.writeText !== 'function'
+  ) {
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: clearing the clipboard is not supported in this environment',
+    );
+  }
+
+  try {
+    await navigator.clipboard.writeText('');
+  } catch {
+    throw new FerryError(
+      'PERMISSION_DENIED',
+      'ferry: the clipboard could not be cleared because the write was denied',
+    );
+  }
+};
+
