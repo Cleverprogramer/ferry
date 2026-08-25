@@ -1,0 +1,27 @@
+{
+  "name": "ferry",
+  "version": "0.2.0",
+  "description": "Tiny zero-dependency browser utility that ferries text and rich HTML onto the clipboard",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --format esm && tsc --emitDeclarationOnly",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
