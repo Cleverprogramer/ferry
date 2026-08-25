@@ -271,3 +271,43 @@ export const readImage = async (): Promise<Blob> => {
   throw new FerryError('INVALID_PAYLOAD', 'ferry: the clipboard does not contain an image');
 };
 
+/**
+ * Collects non-plain-text clipboard entries (images, HTML payloads, custom
+ * formats) and returns them as File objects, named clipboard-N.ext.
+ * Returns an empty array when the clipboard holds only plain text.
+ */
+export const readFiles = async (): Promise<File[]> => {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.read !== 'function' ||
+    typeof ClipboardItem === 'undefined'
+  ) {
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: reading files from the clipboard is not supported in this environment',
+    );
+  }
+
+  let items: ClipboardItem[];
+  try {
+    items = await navigator.clipboard.read();
+  } catch {
+    throw new FerryError(
+      'PERMISSION_DENIED',
+      'ferry: clipboard read was blocked by the browser or denied by the user',
+    );
+  }
+
+  const files: File[] = [];
+  for (const item of items) {
+    for (const type of item.types) {
+      if (type === 'text/plain') continue;
+      const blob = await item.getType(type);
+      const ext = type.split('/')[1]?.replace(/[^a-z0-9]/gi, '') || 'bin';
+      files.push(new File([blob], `clipboard-${files.length + 1}.${ext}`, { type }));
+    }
+  }
+
+  return files;
+};
+

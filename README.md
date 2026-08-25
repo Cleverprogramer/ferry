@@ -84,6 +84,15 @@ const blob = await readImage();
 img.src = URL.createObjectURL(blob);
 ```
 
+### `readFiles(): Promise<File[]>`
+Collects non-plain-text clipboard entries (images, HTML, custom formats) as `File` objects. Returns `[]` when only plain text is present.
+
+```ts
+for (const file of await readFiles()) {
+  upload(file);
+}
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
