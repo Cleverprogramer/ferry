@@ -3,7 +3,10 @@
  * Safe to call in non-browser (SSR/Node) contexts.
  */
 export const isSupported = (): boolean => {
-  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+  if (
+    typeof navigator !== 'undefined' &&
+    typeof navigator.clipboard?.writeText === 'function'
+  ) {
     return true;
   }
   return typeof document !== 'undefined' && typeof document.execCommand === 'function';
@@ -20,7 +23,7 @@ export const copyToClipboard = async (content: string, richHtml = false): Promis
     throw new Error('ferry: no clipboard support detected in this environment');
   }
 
-  if (!richHtml && navigator.clipboard?.writeText) {
+  if (!richHtml && typeof navigator.clipboard?.writeText === 'function') {
     await navigator.clipboard.writeText(content);
     return;
   }
