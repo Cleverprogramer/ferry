@@ -12,6 +12,12 @@ Ships dual **ESM + CJS** bundles with TypeScript declarations — works with `im
 ### `copyToClipboard(content: string, richHtml?: boolean | CopyOptions): Promise<void>`
 Copies text (or rich HTML when `richHtml` is `true`) to the clipboard. Rejects with an `Error` if copying fails or the environment has no clipboard support.
 
+Every API accepts an optional `{ signal: AbortSignal }` to cancel in-flight operations (rejects with code `ABORTED`):
+
+```ts
+await readText({ signal: controller.signal });
+```
+
 Pass an options object to control each clipboard slot independently:
 
 ```ts
