@@ -1,5 +1,23 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { copyToClipboard, isSupported, type RichCopyOptions } from '../src/index';
+import { copyImage, copyToClipboard, isSupported, readText, type RichCopyOptions } from '../src/index';
+
+class FakeClipboardItem {
+  constructor(public data: Record<string, Blob>) {}
+}
+
+const setClipboardItem = (value: unknown) => {
+  Object.defineProperty(globalThis, 'ClipboardItem', { configurable: true, value });
+};
+
+const imageBlob = (type = 'image/png') => new Blob(['fake-image-bytes'], { type });
+
+const writtenItems = () => {
+  const items: Array<Record<string, Blob>> = [];
+  setClipboard({
+    write: async (payload: Array<Record<string, Blob>>) => void items.push(...payload),
+  });
+  return items;
+};
 
 const setClipboard = (value: unknown) => {
   Object.defineProperty(globalThis.navigator, 'clipboard', {
@@ -46,6 +64,7 @@ const captureCopySlots = async (run: () => Promise<void>) => {
 afterEach(() => {
   setClipboard(undefined);
   setExecCommand(undefined);
+  setClipboardItem(undefined);
 });
 
 describe('isSupported', () => {
@@ -174,5 +193,57 @@ describe('copyToClipboard options', () => {
     expect(slots['text/html']).toBe('<i>slick</i>');
     expect(slots['text/plain']).toBe('ignored');
     expect(written).toEqual([]);
+  });
+});
+
+describe('copyImage', () => {
+  it('writes an image Blob to the clipboard under its MIME type', async () => {
+    const items = writtenItems();
+    setClipboardItem(FakeClipboardItem);
+
+    await copyImage(imageBlob('image/webp'));
+    expect(items).toHaveLength(1);
+    const [item] = items as unknown as FakeClipboardItem[];
+    expect(Object.keys(item.data)).toEqual(['image/webp']);
+  });
+
+  it('fetches URL strings and copies the resulting blob', async () => {
+    const items = writtenItems();
+    setClipboardItem(FakeClipboardItem);
+    globalThis.fetch = (async () =>
+      new Response(imageBlob('image/jpeg'), { status: 200 })) as typeof fetch;
+
+    await copyImage('https://example.com/cat.jpg');
+    const [item] = items as unknown as FakeClipboardItem[];
+    expect(Object.keys(item.data)).toEqual(['image/jpeg']);
+  });
+
+  it('rejects when the fetched URL fails', async () => {
+    writtenItems();
+    setClipboardItem(FakeClipboardItem);
+    globalThis.fetch = (async () => new Response('nope', { status: 404 })) as typeof fetch;
+
+    await expect(copyImage('https://example.com/missing.png')).rejects.toThrow(
+      'HTTP 404',
+    );
+  });
+
+  it('rejects non-image payloads', async () => {
+    const items = writtenItems();
+    setClipboardItem(FakeClipboardItem);
+
+    await expect(copyImage(new Blob(['text'], { type: 'text/plain' }))).rejects.toThrow(
+      'expected an image blob but received type "text/plain"',
+    );
+    expect(items).toHaveLength(0);
+  });
+
+  it('rejects when ClipboardItem or clipboard.write is unavailable', async () => {
+    setClipboard({ writeText: async () => {} });
+    setClipboardItem(undefined);
+
+    await expect(copyImage(imageBlob())).rejects.toThrow(
+      'ferry: copying images is not supported',
+    );
   });
 });
