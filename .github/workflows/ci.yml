@@ -21,6 +21,14 @@ jobs:
         run: bun run format:check
       - name: Build
         run: bun run build
+      - name: Validate exports (publint)
+        run: bunx publint
+      - name: Validate types (arethetypeswrong)
+        run: bunx @arethetypeswrong/cli --pack
+      - name: Bundle size budget
+        run: bun scripts/check-size.ts
+      - name: Test with coverage
+        run: bun test --coverage
       - name: Test
         run: bun test
       - name: Upload dist
