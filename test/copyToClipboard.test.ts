@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { copyImage, copyToClipboard, isSupported, readText, type RichCopyOptions } from '../src/index';
+import { copyImage, copyToClipboard, isSupported, type RichCopyOptions } from '../src/index';
 
 class FakeClipboardItem {
   constructor(public data: Record<string, Blob>) {}
@@ -38,11 +38,7 @@ const setExecCommand = (impl: ((command: string) => boolean) | undefined) => {
 const captureCopySlots = async (run: () => Promise<void>) => {
   let listener: ((e: unknown) => void) | undefined;
   const originalAdd = document.addEventListener.bind(document);
-  document.addEventListener = ((
-    type: string,
-    cb: (e: unknown) => void,
-    opts?: unknown,
-  ) => {
+  document.addEventListener = ((type: string, cb: (e: unknown) => void, opts?: unknown) => {
     if (type === 'copy') listener = cb;
     return originalAdd(type, cb, opts);
   }) as typeof document.addEventListener;
@@ -135,9 +131,7 @@ describe('copyToClipboard', () => {
     setClipboard(undefined);
     setExecCommand(undefined);
 
-    await expect(copyToClipboard('x')).rejects.toThrow(
-      'ferry: no clipboard support detected',
-    );
+    await expect(copyToClipboard('x')).rejects.toThrow('ferry: no clipboard support detected');
   });
 
   it('propagates writeText rejections to the caller', async () => {
@@ -188,7 +182,9 @@ describe('copyToClipboard options', () => {
       return true;
     });
 
-    const slots = await captureCopySlots(() => copyToClipboard('ignored', { html: '<i>slick</i>' }));
+    const slots = await captureCopySlots(() =>
+      copyToClipboard('ignored', { html: '<i>slick</i>' }),
+    );
     expect(executed).toBe(true);
     expect(slots['text/html']).toBe('<i>slick</i>');
     expect(slots['text/plain']).toBe('ignored');
@@ -223,9 +219,7 @@ describe('copyImage', () => {
     setClipboardItem(FakeClipboardItem);
     globalThis.fetch = (async () => new Response('nope', { status: 404 })) as typeof fetch;
 
-    await expect(copyImage('https://example.com/missing.png')).rejects.toThrow(
-      'HTTP 404',
-    );
+    await expect(copyImage('https://example.com/missing.png')).rejects.toThrow('HTTP 404');
   });
 
   it('rejects non-image payloads', async () => {
@@ -242,8 +236,6 @@ describe('copyImage', () => {
     setClipboard({ writeText: async () => {} });
     setClipboardItem(undefined);
 
-    await expect(copyImage(imageBlob())).rejects.toThrow(
-      'ferry: copying images is not supported',
-    );
+    await expect(copyImage(imageBlob())).rejects.toThrow('ferry: copying images is not supported');
   });
 });

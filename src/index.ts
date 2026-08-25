@@ -65,10 +65,7 @@ const throwIfAborted = (signal?: AbortSignal): void => {
  * Safe to call in non-browser (SSR/Node) contexts.
  */
 export const isSupported = (): boolean => {
-  if (
-    typeof navigator !== 'undefined' &&
-    typeof navigator.clipboard?.writeText === 'function'
-  ) {
+  if (typeof navigator !== 'undefined' && typeof navigator.clipboard?.writeText === 'function') {
     return true;
   }
   return typeof document !== 'undefined' && typeof document.execCommand === 'function';
@@ -80,7 +77,10 @@ export const isSupported = (): boolean => {
  * document.execCommand('copy'). Rejects with an Error when copying fails
  * or the environment offers no clipboard support.
  */
-export const copyToClipboard = async (content: string, options: CopyOptions = false): Promise<void> => {
+export const copyToClipboard = async (
+  content: string,
+  options: CopyOptions = false,
+): Promise<void> => {
   throwIfAborted(typeof options === 'object' && options !== null ? options.signal : undefined);
 
   if (!isSupported()) {
@@ -150,10 +150,7 @@ export const copyToClipboard = async (content: string, options: CopyOptions = fa
 export const readText = async (options: ReadOptions = {}): Promise<string> => {
   throwIfAborted(options.signal);
 
-  if (
-    typeof navigator === 'undefined' ||
-    typeof navigator.clipboard?.readText !== 'function'
-  ) {
+  if (typeof navigator === 'undefined' || typeof navigator.clipboard?.readText !== 'function') {
     throw new FerryError(
       'UNSUPPORTED',
       'ferry: reading the clipboard is not supported in this environment',
@@ -188,7 +185,10 @@ export const copyImage = async (
     typeof navigator.clipboard?.write !== 'function' ||
     typeof ClipboardItem === 'undefined'
   ) {
-    throw new FerryError('UNSUPPORTED', 'ferry: copying images is not supported in this environment');
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: copying images is not supported in this environment',
+    );
   }
 
   // Safari requires ClipboardItem to be constructed while the user gesture is
@@ -226,7 +226,10 @@ export const copyImage = async (
   if (typeof source === 'string') {
     const response = await fetch(source, { signal: options.signal });
     if (!response.ok) {
-      throw new FerryError('FETCH_FAILED', `ferry: failed to fetch image from "${source}" (HTTP ${response.status})`);
+      throw new FerryError(
+        'FETCH_FAILED',
+        `ferry: failed to fetch image from "${source}" (HTTP ${response.status})`,
+      );
     }
     blob = await response.blob();
   } else {
@@ -255,10 +258,7 @@ export const copyImage = async (
  * Requires the async Clipboard API; rejects where unavailable.
  */
 export const clear = async (): Promise<void> => {
-  if (
-    typeof navigator === 'undefined' ||
-    typeof navigator.clipboard?.writeText !== 'function'
-  ) {
+  if (typeof navigator === 'undefined' || typeof navigator.clipboard?.writeText !== 'function') {
     throw new FerryError(
       'UNSUPPORTED',
       'ferry: clearing the clipboard is not supported in this environment',
@@ -285,7 +285,10 @@ export const copyJson = async (value: unknown, pretty = false): Promise<void> =>
   try {
     json = pretty ? JSON.stringify(value, null, 2) : JSON.stringify(value);
   } catch (err) {
-    throw new FerryError('INVALID_PAYLOAD', `ferry: value is not JSON-serializable (${(err as Error).message})`);
+    throw new FerryError(
+      'INVALID_PAYLOAD',
+      `ferry: value is not JSON-serializable (${(err as Error).message})`,
+    );
   }
 
   return copyToClipboard(json);
@@ -301,10 +304,7 @@ export const copyElement = async (element: Element): Promise<void> => {
     element === null ||
     typeof (element as Element).outerHTML !== 'string'
   ) {
-    throw new FerryError(
-      'INVALID_PAYLOAD',
-      'ferry: copyElement expects a DOM Element',
-    );
+    throw new FerryError('INVALID_PAYLOAD', 'ferry: copyElement expects a DOM Element');
   }
 
   return copyToClipboard(element.outerHTML);
@@ -317,7 +317,7 @@ export const copyElement = async (element: Element): Promise<void> => {
  * UNSUPPORTED where reading fails or is unavailable.
  */
 export const readImage = async (options: ReadOptions = {}): Promise<Blob> => {
-    throwIfAborted(options.signal);
+  throwIfAborted(options.signal);
 
   if (
     typeof navigator === 'undefined' ||
@@ -356,7 +356,7 @@ export const readImage = async (options: ReadOptions = {}): Promise<Blob> => {
  * Returns an empty array when the clipboard holds only plain text.
  */
 export const readFiles = async (options: ReadOptions = {}): Promise<File[]> => {
-    throwIfAborted(options.signal);
+  throwIfAborted(options.signal);
 
   if (
     typeof navigator === 'undefined' ||
@@ -391,4 +391,3 @@ export const readFiles = async (options: ReadOptions = {}): Promise<File[]> => {
 
   return files;
 };
-
