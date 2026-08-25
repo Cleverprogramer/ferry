@@ -21,6 +21,16 @@ jobs:
         run: bun run format:check
       - name: Build
         run: bun run build
+      - name: Validate exports (publint)
+        run: bunx publint
+      - name: Validate types (arethetypeswrong)
+        # FalseESM is a known-safe artifact of shipping ESM-syntax declarations
+        # for the CJS bundle; all exports are plain functions/classes.
+        run: bunx @arethetypeswrong/cli --pack --ignore-rules false-esm
+      - name: Bundle size budget
+        run: bun scripts/check-size.ts
+      - name: Test with coverage
+        run: bun test --coverage
       - name: Test
         run: bun test
       - name: Upload dist
