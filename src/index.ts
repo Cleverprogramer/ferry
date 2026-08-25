@@ -101,3 +101,45 @@ export const readText = async (): Promise<string> => {
   }
 };
 
+/**
+ * Copies an image to the clipboard via ClipboardItem.
+ * Accepts an image Blob directly, or a URL string which is fetched and
+ * converted to a Blob automatically. Rejects with a descriptive Error
+ * where image copying is unsupported, the payload is not an image,
+ * or the browser denies the write.
+ */
+export const copyImage = async (source: Blob | string): Promise<void> => {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.write !== 'function' ||
+    typeof ClipboardItem === 'undefined'
+  ) {
+    throw new Error('ferry: copying images is not supported in this environment');
+  }
+
+  let blob: Blob;
+  if (typeof source === 'string') {
+    const response = await fetch(source);
+    if (!response.ok) {
+      throw new Error(`ferry: failed to fetch image from "${source}" (HTTP ${response.status})`);
+    }
+    blob = await response.blob();
+  } else {
+    blob = source;
+  }
+
+  if (!blob.type.startsWith('image/')) {
+    throw new Error(
+      `ferry: expected an image blob but received type "${blob.type || 'unknown'}"`,
+    );
+  }
+
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+  } catch {
+    throw new Error(
+      'ferry: the clipboard rejected this image payload or permission was denied',
+    );
+  }
+};
+
