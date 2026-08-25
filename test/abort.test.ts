@@ -98,3 +98,47 @@ describe('copyImage async factories (Safari-safe)', () => {
     }
   });
 });
+
+describe('prefer strategy option', () => {
+  it("prefer: 'fallback' skips the async API even when available", async () => {
+    const written: string[] = [];
+    setClipboard({ writeText: async (t: string) => void written.push(t) });
+    let executed = false;
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: () => {
+        executed = true;
+        return true;
+      },
+      writable: true,
+    });
+
+    await copyToClipboard('legacy', { prefer: 'fallback' });
+    expect(executed).toBe(true);
+    expect(written).toEqual([]);
+  });
+
+  it("prefer: 'async' uses the Clipboard API as usual", async () => {
+    const written: string[] = [];
+    setClipboard({ writeText: async (t: string) => void written.push(t) });
+
+    await copyToClipboard('modern', { prefer: 'async' });
+    expect(written).toEqual(['modern']);
+  });
+
+  it("prefer: 'fallback' without execCommand support rejects COPY_FAILED via UNSUPPORTED path", async () => {
+    setClipboard({ writeText: async () => {} });
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: undefined,
+      writable: true,
+    });
+
+    try {
+      await copyToClipboard('x', { prefer: 'fallback' });
+      expect.unreachable();
+    } catch (err) {
+      expect((err as import('../src/index').FerryError).code).toBe('UNSUPPORTED');
+    }
+  });
+});

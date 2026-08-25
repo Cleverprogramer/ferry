@@ -105,6 +105,11 @@ for (const file of await readFiles()) {
 }
 ```
 
+```ts
+// Force the legacy path for deterministic testing
+await copyToClipboard('text', { prefer: 'fallback' });
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
