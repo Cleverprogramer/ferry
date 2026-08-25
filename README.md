@@ -69,6 +69,13 @@ Serializes a value to JSON and copies it. `pretty = true` uses 2-space indentati
 await copyJson({ hello: 'world' }, true);
 ```
 
+### `copyElement(element: Element): Promise<void>`
+Copies a DOM element's markup (`outerHTML`) as rich HTML content. Rejects with `INVALID_PAYLOAD` for non-elements.
+
+```ts
+document.querySelector('#chart') && await copyElement(document.querySelector('#chart')!);
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
