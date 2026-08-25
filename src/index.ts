@@ -1,4 +1,19 @@
 /**
+ * Granular control over what lands in each clipboard slot.
+ * When omitted, `text` defaults to `content` and `html` defaults to
+ * `content` for rich copies (`options === true`).
+ */
+export interface RichCopyOptions {
+  /** Markup written to the text/html slot */
+  html?: string;
+  /** Plain text written to the text/plain slot */
+  text?: string;
+}
+
+/** Either the legacy boolean (`true` = rich copy) or per-slot overrides. */
+export type CopyOptions = boolean | RichCopyOptions;
+
+/**
  * Detects whether any clipboard strategy is available in the current environment.
  * Safe to call in non-browser (SSR/Node) contexts.
  */
@@ -18,13 +33,18 @@ export const isSupported = (): boolean => {
  * document.execCommand('copy'). Rejects with an Error when copying fails
  * or the environment offers no clipboard support.
  */
-export const copyToClipboard = async (content: string, richHtml = false): Promise<void> => {
+export const copyToClipboard = async (content: string, options: CopyOptions = false): Promise<void> => {
   if (!isSupported()) {
     throw new Error('ferry: no clipboard support detected in this environment');
   }
 
-  if (!richHtml && typeof navigator.clipboard?.writeText === 'function') {
-    await navigator.clipboard.writeText(content);
+  const richHtml = options === true;
+  const explicit = typeof options === 'object' && options !== null ? options : {};
+  const html = explicit.html ?? (richHtml ? content : undefined);
+  const text = explicit.text ?? content;
+
+  if (!richHtml && !explicit.html && typeof navigator.clipboard?.writeText === 'function') {
+    await navigator.clipboard.writeText(text);
     return;
   }
 
@@ -32,7 +52,7 @@ export const copyToClipboard = async (content: string, richHtml = false): Promis
   textArea.style.maxHeight = '0';
   textArea.style.height = '0';
   textArea.style.opacity = '0';
-  textArea.value = content;
+  textArea.value = text;
   document.body.appendChild(textArea);
   textArea.select();
 
@@ -40,8 +60,8 @@ export const copyToClipboard = async (content: string, richHtml = false): Promis
     e.preventDefault();
 
     if (e.clipboardData) {
-      e.clipboardData.setData('text/html', content);
-      e.clipboardData.setData('text/plain', content);
+      e.clipboardData.setData('text/html', html as string);
+      e.clipboardData.setData('text/plain', text);
     }
   };
 
