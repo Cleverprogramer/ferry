@@ -110,6 +110,17 @@ for (const file of await readFiles()) {
 await copyToClipboard('text', { prefer: 'fallback' });
 ```
 
+### CDN / script tag
+
+No bundler? Use the global build — the full API hangs off `window.Ferry`:
+
+```html
+<script src="https://unpkg.com/ferry/dist/ferry.global.js"></script>
+<script>
+  Ferry.copyToClipboard('hello!');
+</script>
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
