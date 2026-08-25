@@ -35,7 +35,28 @@ export interface RichCopyOptions {
 }
 
 /** Either the legacy boolean (`true` = rich copy) or per-slot overrides. */
+export interface RichCopyOptions {
+  /** Markup written to the text/html slot */
+  html?: string;
+  /** Plain text written to the text/plain slot */
+  text?: string;
+  /** Abort the operation before or while it runs */
+  signal?: AbortSignal;
+}
+
 export type CopyOptions = boolean | RichCopyOptions;
+
+/** Options accepted by read-style APIs. */
+export interface ReadOptions {
+  /** Abort the operation before or while it runs */
+  signal?: AbortSignal;
+}
+
+const throwIfAborted = (signal?: AbortSignal): void => {
+  if (signal?.aborted) {
+    throw new FerryError('ABORTED', 'ferry: the operation was aborted');
+  }
+};
 
 /**
  * Detects whether any clipboard strategy is available in the current environment.
@@ -58,6 +79,8 @@ export const isSupported = (): boolean => {
  * or the environment offers no clipboard support.
  */
 export const copyToClipboard = async (content: string, options: CopyOptions = false): Promise<void> => {
+  throwIfAborted(typeof options === 'object' && options !== null ? options.signal : undefined);
+
   if (!isSupported()) {
     throw new FerryError('UNSUPPORTED', 'ferry: no clipboard support detected in this environment');
   }
@@ -108,7 +131,9 @@ export const copyToClipboard = async (content: string, options: CopyOptions = fa
  * Requires the async Clipboard API and read permission; rejects with a
  * descriptive Error where reading is unsupported or denied.
  */
-export const readText = async (): Promise<string> => {
+export const readText = async (options: ReadOptions = {}): Promise<string> => {
+  throwIfAborted(options.signal);
+
   if (
     typeof navigator === 'undefined' ||
     typeof navigator.clipboard?.readText !== 'function'
@@ -136,7 +161,9 @@ export const readText = async (): Promise<string> => {
  * where image copying is unsupported, the payload is not an image,
  * or the browser denies the write.
  */
-export const copyImage = async (source: Blob | string): Promise<void> => {
+export const copyImage = async (source: Blob | string, options: ReadOptions = {}): Promise<void> => {
+  throwIfAborted(options.signal);
+
   if (
     typeof navigator === 'undefined' ||
     typeof navigator.clipboard?.write !== 'function' ||
@@ -147,7 +174,7 @@ export const copyImage = async (source: Blob | string): Promise<void> => {
 
   let blob: Blob;
   if (typeof source === 'string') {
-    const response = await fetch(source);
+    const response = await fetch(source, { signal: options.signal });
     if (!response.ok) {
       throw new FerryError('FETCH_FAILED', `ferry: failed to fetch image from "${source}" (HTTP ${response.status})`);
     }
@@ -239,7 +266,9 @@ export const copyElement = async (element: Element): Promise<void> => {
  * INVALID_PAYLOAD when no image is present and PERMISSION_DENIED or
  * UNSUPPORTED where reading fails or is unavailable.
  */
-export const readImage = async (): Promise<Blob> => {
+export const readImage = async (options: ReadOptions = {}): Promise<Blob> => {
+    throwIfAborted(options.signal);
+
   if (
     typeof navigator === 'undefined' ||
     typeof navigator.clipboard?.read !== 'function' ||
@@ -276,7 +305,9 @@ export const readImage = async (): Promise<Blob> => {
  * formats) and returns them as File objects, named clipboard-N.ext.
  * Returns an empty array when the clipboard holds only plain text.
  */
-export const readFiles = async (): Promise<File[]> => {
+export const readFiles = async (options: ReadOptions = {}): Promise<File[]> => {
+    throwIfAborted(options.signal);
+
   if (
     typeof navigator === 'undefined' ||
     typeof navigator.clipboard?.read !== 'function' ||
