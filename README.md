@@ -7,6 +7,8 @@ Built and managed with [bun](https://bun.sh).
 
 Ships dual **ESM + CJS** bundles with TypeScript declarations — works with `import`, `require()`, bundlers, and CDNs.
 
+🎮 **[Try the live playground →](https://cleverprogramer.github.io/ferry/)**
+
 ## API
 
 ### `copyToClipboard(content: string, richHtml?: boolean | CopyOptions): Promise<void>`
