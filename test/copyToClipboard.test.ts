@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { copyToClipboard, isSupported } from '../src/index';
+import { copyToClipboard, isSupported, type RichCopyOptions } from '../src/index';
 
 const setClipboard = (value: unknown) => {
   Object.defineProperty(globalThis.navigator, 'clipboard', {
@@ -14,6 +14,33 @@ const setExecCommand = (impl: ((command: string) => boolean) | undefined) => {
     value: impl,
     writable: true,
   });
+};
+
+/** Captures the copy-event listener ferry registers and invokes it with a stub event. */
+const captureCopySlots = async (run: () => Promise<void>) => {
+  let listener: ((e: unknown) => void) | undefined;
+  const originalAdd = document.addEventListener.bind(document);
+  document.addEventListener = ((
+    type: string,
+    cb: (e: unknown) => void,
+    opts?: unknown,
+  ) => {
+    if (type === 'copy') listener = cb;
+    return originalAdd(type, cb, opts);
+  }) as typeof document.addEventListener;
+
+  try {
+    await run();
+  } finally {
+    document.addEventListener = originalAdd;
+  }
+
+  const slots: Record<string, string> = {};
+  listener?.({
+    preventDefault() {},
+    clipboardData: { setData: (type: string, value: string) => (slots[type] = value) },
+  });
+  return slots;
 };
 
 afterEach(() => {
@@ -102,5 +129,50 @@ describe('copyToClipboard', () => {
     });
 
     await expect(copyToClipboard('secret')).rejects.toThrow('denied');
+  });
+});
+
+describe('copyToClipboard options', () => {
+  it('keeps boolean rich copy behavior: content fills both slots', async () => {
+    setClipboard(undefined);
+    setExecCommand(() => true);
+
+    const slots = await captureCopySlots(() => copyToClipboard('<b>bold</b>', true));
+    expect(slots['text/html']).toBe('<b>bold</b>');
+    expect(slots['text/plain']).toBe('<b>bold</b>');
+  });
+
+  it('writes distinct html and text slots from an options object', async () => {
+    setClipboard(undefined);
+    setExecCommand(() => true);
+
+    const options: RichCopyOptions = { html: '<b>bold</b>', text: 'bold' };
+    const slots = await captureCopySlots(() => copyToClipboard('<b>bold</b>', options));
+    expect(slots['text/html']).toBe('<b>bold</b>');
+    expect(slots['text/plain']).toBe('bold');
+  });
+
+  it('routes explicit plain text through the async API when no html is given', async () => {
+    const written: string[] = [];
+    setClipboard({ writeText: async (text: string) => void written.push(text) });
+
+    await copyToClipboard('<b>bold</b>', { text: 'bold' });
+    expect(written).toEqual(['bold']);
+  });
+
+  it('forces the fallback when only html is provided', async () => {
+    const written: string[] = [];
+    setClipboard({ writeText: async (text: string) => void written.push(text) });
+    let executed = false;
+    setExecCommand(() => {
+      executed = true;
+      return true;
+    });
+
+    const slots = await captureCopySlots(() => copyToClipboard('ignored', { html: '<i>slick</i>' }));
+    expect(executed).toBe(true);
+    expect(slots['text/html']).toBe('<i>slick</i>');
+    expect(slots['text/plain']).toBe('ignored');
+    expect(written).toEqual([]);
   });
 });
