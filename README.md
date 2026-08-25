@@ -20,6 +20,13 @@ await copyToClipboard('<b>bold</b>', { html: '<b>bold</b>', text: 'bold' });
 ### `isSupported(): boolean`
 Returns `true` if any clipboard strategy (async Clipboard API or `execCommand` fallback) is available. Safe to call in SSR/Node environments.
 
+### `readText(): Promise<string>`
+Reads the clipboard's current text content. Rejects with an `Error` when reading is unsupported or permission is denied.
+
+```ts
+const pasted = await readText();
+```
+
 ## Examples
 
 ### Text
