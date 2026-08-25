@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🚢 ferry — playground</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#2f81f7; --ok:#3fb950; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:ui-sans-serif,system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); padding:24px; max-width:860px; margin:auto; }
+  h1 { font-size:1.6rem; } h1 span { opacity:.6; font-weight:400; font-size:.85rem; display:block; color:var(--muted); }
+  .badge { display:inline-block; margin-top:8px; padding:4px 10px; border-radius:99px; font-size:.75rem; background:var(--card); border:1px solid var(--border); }
+  .badge.ok { color:var(--ok); border-color:var(--ok); }
+  .grid { display:grid; gap:16px; margin-top:20px; }
+  @media(min-width:700px){ .grid.two { grid-template-columns:1fr 1fr; } }
+  section { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; }
+  h2 { font-size:.95rem; margin-bottom:10px; color:var(--accent); }
+  textarea, input[type=text] { width:100%; min-height:70px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:10px; font:inherit; resize:vertical; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; font:inherit; cursor:pointer; margin:8px 8px 0 0; }
+  button.ghost { background:transparent; border:1px solid var(--border); color:var(--text); }
+  button:active { transform:translateY(1px); }
+  pre, .out { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; margin-top:10px; white-space:pre-wrap; word-break:break-word; font-size:.82rem; color:var(--muted); min-height:20px; }
+  img#pasteImg { max-width:100%; border-radius:8px; margin-top:10px; display:none; }
+  code { color:var(--accent); }
+  footer { margin-top:24px; color:var(--muted); font-size:.78rem; text-align:center; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<h1>🚢 ferry <span>tiny zero-dependency clipboard utility — live demo</span></h1>
+<div id="supported" class="badge">checking support…</div>
+
+<div class="grid two">
+  <section>
+    <h2>✍️ copyToClipboard — plain text</h2>
+    <textarea id="plain">hello from ferry! 🚢</textarea>
+    <button data-act="copyPlain">Copy text</button>
+    <div class="out" id="outPlain"></div>
+  </section>
+
+  <section>
+    <h2>🎨 copyToClipboard — rich HTML + plain fallback</h2>
+    <textarea id="rich"><b>bold!</b> and an <a href="https://github.com/Cleverprogramer/ferry">link</a></textarea>
+    <button data-act="copyRich">Copy rich (both slots)</button>
+    <button data-act="copySlots">Copy distinct slots</button>
+    <div class="out" id="outRich"></div>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:8px">Paste into a rich editor for markup, a plain editor for clean text.</p>
+  </section>
+
+  <section>
+    <h2>🧾 copyJson / clear / isSupported</h2>
+    <button data-act="copyJson">Copy JSON (pretty)</button>
+    <button class="ghost" data-act="clear">clear()</button>
+    <button class="ghost" data-act="supported">isSupported()</button>
+    <pre id="outJson"></pre>
+  </section>
+
+  <section>
+    <h2>📖 readText / readImage / readFiles</h2>
+    <button data-act="readText" class="ghost">readText()</button>
+    <button data-act="readImage" class="ghost">readImage()</button>
+    <button data-act="readFiles" class="ghost">readFiles()</button>
+    <div class="out" id="outRead"></div>
+    <img id="pasteImg" alt="clipboard image preview" />
+  </section>
+
+  <section style="grid-column:1/-1">
+    <h2>🖼️ copyImage — draw &amp; copy a canvas (async factory, Safari-safe)</h2>
+    <canvas id="cv" width="220" height="90" style="background:#fff;border-radius:8px"></canvas>
+    <br/>
+    <button data-act="copyCanvas">copyImage(() => toBlob(), { type })</button>
+    <div class="out" id="outImg"></div>
+  </section>
+</div>
+<footer>full API on <a href="https://github.com/Cleverprogramer/ferry">GitHub</a> · errors are <code>FerryError</code> with stable codes · zero dependencies</footer>
+
+<script src="./ferry.global.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const show = (id, msg, isErr = false) => {
+    $(id).textContent = msg;
+    $(id).style.color = isErr ? '#f85149' : '';
+  };
+  const err = (id, e) => show(id, e.name + ': ' + (e.code ?? '') + ' ' + e.message, true);
+
+  function refreshSupport() {
+    const ok = Ferry.isSupported();
+    const el = $('supported');
+    el.textContent = ok ? '● clipboard supported' : '● no clipboard support in this browser';
+    el.className = 'badge' + (ok ? ' ok' : '');
+  }
+
+  const actions = {
+    async copyPlain() {
+      try { await Ferry.copyToClipboard($('plain').value); show('outPlain', '✔ copied'); }
+      catch (e) { err('outPlain', e); }
+    },
+    async copyRich() {
+      try { await Ferry.copyToClipboard($('rich').value, true); show('outRich', '✔ copied (both slots = markup)'); }
+      catch (e) { err('outRich', e); }
+    },
+    async copySlots() {
+      const html = $('rich').value;
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      try {
+        await Ferry.copyToClipboard(html, { html, text: tmp.textContent });
+        show('outRich', '✔ distinct slots → plain slot: "' + tmp.textContent + '"');
+      } catch (e) { err('outRich', e); }
+    },
+    async copyJson() {
+      try {
+        await Ferry.copyJson({ library: 'ferry', deps: 0 }, true);
+        show('outJson', '✔ pretty JSON copied — paste anywhere');
+      } catch (e) { err('outJson', e); }
+    },
+    async clear() {
+      try { await Ferry.clear(); show('outJson', '✔ clipboard cleared'); }
+      catch (e) { err('outJson', e); }
+    },
+    async supported() { show('outJson', 'Ferry.isSupported() → ' + Ferry.isSupported()); },
+    async readText() {
+      try { show('outRead', await Ferry.readText()); }
+      catch (e) { err('outRead', e); }
+    },
+    async readImage() {
+      try {
+        const blob = await Ferry.readImage();
+        $('pasteImg').src = URL.createObjectURL(blob);
+        $('pasteImg').style.display = 'block';
+        show('outRead', '✔ image blob (' + blob.type + ', ' + blob.size + ' bytes)');
+      } catch (e) { err('outRead', e); }
+    },
+    async readFiles() {
+      try {
+        const files = await Ferry.readFiles();
+        show('outRead', files.length ? files.map(f => f.name + ' (' + f.type + ')').join('\n') : '(no file entries)');
+      } catch (e) { err('outRead', e); }
+    },
+    async copyCanvas() {
+      const cv = $('cv'), ctx = cv.getContext('2d');
+      ctx.fillStyle = '#2f81f7'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 22px sans-serif'; ctx.fillText('🚢 ferry', 55, 55);
+      try {
+        await Ferry.copyImage(() => new Promise((res) => cv.toBlob(res, 'image/png')), { type: 'image/png' });
+        show('outImg', '✔ canvas copied as image/png — paste into Figma/Slack/Gmail');
+      } catch (e) { err('outImg', e); }
+    },
+  };
+
+  document.querySelectorAll('button[data-act]').forEach((b) => {
+    b.addEventListener('click', () => actions[b.dataset.act]());
+  });
+  refreshSupport();
+</script>
+</body>
+</html>
