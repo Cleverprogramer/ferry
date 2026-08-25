@@ -1,3 +1,27 @@
+/** Machine-readable reasons a clipboard operation can fail. */
+export type FerryErrorCode =
+  | 'UNSUPPORTED'
+  | 'PERMISSION_DENIED'
+  | 'COPY_FAILED'
+  | 'INVALID_PAYLOAD'
+  | 'FETCH_FAILED'
+  | 'ABORTED';
+
+/**
+ * Error thrown/rejected by every ferry API.
+ * Carries a stable `code` so callers can branch on failure kinds
+ * without matching on message strings.
+ */
+export class FerryError extends Error {
+  readonly code: FerryErrorCode;
+
+  constructor(code: FerryErrorCode, message: string) {
+    super(message);
+    this.name = 'FerryError';
+    this.code = code;
+  }
+}
+
 /**
  * Granular control over what lands in each clipboard slot.
  * When omitted, `text` defaults to `content` and `html` defaults to
@@ -35,7 +59,7 @@ export const isSupported = (): boolean => {
  */
 export const copyToClipboard = async (content: string, options: CopyOptions = false): Promise<void> => {
   if (!isSupported()) {
-    throw new Error('ferry: no clipboard support detected in this environment');
+    throw new FerryError('UNSUPPORTED', 'ferry: no clipboard support detected in this environment');
   }
 
   const richHtml = options === true;
@@ -75,7 +99,7 @@ export const copyToClipboard = async (content: string, options: CopyOptions = fa
   }
 
   if (!succeeded) {
-    throw new Error('ferry: execCommand("copy") fallback failed');
+    throw new FerryError('COPY_FAILED', 'ferry: execCommand("copy") fallback failed');
   }
 };
 
@@ -89,13 +113,17 @@ export const readText = async (): Promise<string> => {
     typeof navigator === 'undefined' ||
     typeof navigator.clipboard?.readText !== 'function'
   ) {
-    throw new Error('ferry: reading the clipboard is not supported in this environment');
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: reading the clipboard is not supported in this environment',
+    );
   }
 
   try {
     return await navigator.clipboard.readText();
   } catch {
-    throw new Error(
+    throw new FerryError(
+      'PERMISSION_DENIED',
       'ferry: clipboard read was blocked by the browser or denied by the user',
     );
   }
@@ -114,14 +142,14 @@ export const copyImage = async (source: Blob | string): Promise<void> => {
     typeof navigator.clipboard?.write !== 'function' ||
     typeof ClipboardItem === 'undefined'
   ) {
-    throw new Error('ferry: copying images is not supported in this environment');
+    throw new FerryError('UNSUPPORTED', 'ferry: copying images is not supported in this environment');
   }
 
   let blob: Blob;
   if (typeof source === 'string') {
     const response = await fetch(source);
     if (!response.ok) {
-      throw new Error(`ferry: failed to fetch image from "${source}" (HTTP ${response.status})`);
+      throw new FerryError('FETCH_FAILED', `ferry: failed to fetch image from "${source}" (HTTP ${response.status})`);
     }
     blob = await response.blob();
   } else {
@@ -129,7 +157,8 @@ export const copyImage = async (source: Blob | string): Promise<void> => {
   }
 
   if (!blob.type.startsWith('image/')) {
-    throw new Error(
+    throw new FerryError(
+      'INVALID_PAYLOAD',
       `ferry: expected an image blob but received type "${blob.type || 'unknown'}"`,
     );
   }
@@ -137,7 +166,8 @@ export const copyImage = async (source: Blob | string): Promise<void> => {
   try {
     await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
   } catch {
-    throw new Error(
+    throw new FerryError(
+      'PERMISSION_DENIED',
       'ferry: the clipboard rejected this image payload or permission was denied',
     );
   }
