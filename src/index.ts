@@ -198,3 +198,19 @@ export const clear = async (): Promise<void> => {
   }
 };
 
+/**
+ * Serializes a value to JSON and copies it.
+ * Pass `pretty = true` for 2-space indented output.
+ * Throws INVALID_PAYLOAD for values JSON cannot represent (e.g. BigInt).
+ */
+export const copyJson = async (value: unknown, pretty = false): Promise<void> => {
+  let json: string;
+  try {
+    json = pretty ? JSON.stringify(value, null, 2) : JSON.stringify(value);
+  } catch (err) {
+    throw new FerryError('INVALID_PAYLOAD', `ferry: value is not JSON-serializable (${(err as Error).message})`);
+  }
+
+  return copyToClipboard(json);
+};
+

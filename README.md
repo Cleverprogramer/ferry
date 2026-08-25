@@ -62,6 +62,13 @@ Overwrites the clipboard with an empty string. Rejects where the async Clipboard
 await clear();
 ```
 
+### `copyJson(value: unknown, pretty?: boolean): Promise<void>`
+Serializes a value to JSON and copies it. `pretty = true` uses 2-space indentation. Rejects with `INVALID_PAYLOAD` for values JSON cannot represent.
+
+```ts
+await copyJson({ hello: 'world' }, true);
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
