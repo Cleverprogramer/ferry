@@ -3,22 +3,24 @@
   "version": "0.2.0",
   "description": "Tiny zero-dependency browser utility that ferries text and rich HTML onto the clipboard",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --format esm && tsc --emitDeclarationOnly",
+    "build": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && tsc --emitDeclarationOnly",
     "test": "bun test"
   },
   "devDependencies": {
