@@ -233,3 +233,41 @@ export const copyElement = async (element: Element): Promise<void> => {
   return copyToClipboard(element.outerHTML);
 };
 
+/**
+ * Returns the first image payload found on the clipboard as a Blob.
+ * Requires the async Clipboard API with read access; rejects with
+ * INVALID_PAYLOAD when no image is present and PERMISSION_DENIED or
+ * UNSUPPORTED where reading fails or is unavailable.
+ */
+export const readImage = async (): Promise<Blob> => {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.read !== 'function' ||
+    typeof ClipboardItem === 'undefined'
+  ) {
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: reading images from the clipboard is not supported in this environment',
+    );
+  }
+
+  let items: ClipboardItem[];
+  try {
+    items = await navigator.clipboard.read();
+  } catch {
+    throw new FerryError(
+      'PERMISSION_DENIED',
+      'ferry: clipboard read was blocked by the browser or denied by the user',
+    );
+  }
+
+  for (const item of items) {
+    const imageType = item.types.find((type) => type.startsWith('image/'));
+    if (imageType) {
+      return item.getType(imageType);
+    }
+  }
+
+  throw new FerryError('INVALID_PAYLOAD', 'ferry: the clipboard does not contain an image');
+};
+
