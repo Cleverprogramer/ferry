@@ -55,6 +55,24 @@ if (!isSupported()) {
 }
 ```
 
+## Error handling
+
+Every API rejects with a `FerryError` carrying a stable `code`:
+`UNSUPPORTED`, `PERMISSION_DENIED`, `COPY_FAILED`, `INVALID_PAYLOAD`,
+`FETCH_FAILED`, or `ABORTED` — branch on codes, not message strings.
+
+```ts
+import { copyToClipboard, FerryError } from 'ferry';
+
+try {
+  await copyToClipboard(text);
+} catch (err) {
+  if (err instanceof FerryError && err.code === 'PERMISSION_DENIED') {
+    showPermissionHelp();
+  }
+}
+```
+
 ## Development
 
 ```bash
