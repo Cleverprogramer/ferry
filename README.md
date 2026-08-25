@@ -76,6 +76,14 @@ Copies a DOM element's markup (`outerHTML`) as rich HTML content. Rejects with `
 document.querySelector('#chart') && await copyElement(document.querySelector('#chart')!);
 ```
 
+### `readImage(): Promise<Blob>`
+Returns the first image payload on the clipboard as a `Blob`. Rejects with `UNSUPPORTED`, `PERMISSION_DENIED`, or `INVALID_PAYLOAD` (no image present) as appropriate.
+
+```ts
+const blob = await readImage();
+img.src = URL.createObjectURL(blob);
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
