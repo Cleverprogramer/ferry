@@ -214,3 +214,22 @@ export const copyJson = async (value: unknown, pretty = false): Promise<void> =>
   return copyToClipboard(json);
 };
 
+/**
+ * Copies an Element's markup (outerHTML) as rich HTML content, so pasting
+ * into rich editors preserves formatting while plain editors get the tags.
+ */
+export const copyElement = async (element: Element): Promise<void> => {
+  if (
+    typeof element !== 'object' ||
+    element === null ||
+    typeof (element as Element).outerHTML !== 'string'
+  ) {
+    throw new FerryError(
+      'INVALID_PAYLOAD',
+      'ferry: copyElement expects a DOM Element',
+    );
+  }
+
+  return copyToClipboard(element.outerHTML);
+};
+
