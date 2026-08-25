@@ -20,7 +20,9 @@
   ],
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && tsc --emitDeclarationOnly",
+    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly",
+    "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs",
+    "build:cdn": "bun build src/cdn.ts --outfile dist/ferry.global.js --format=iife",
     "test": "bun test"
   },
   "devDependencies": {
