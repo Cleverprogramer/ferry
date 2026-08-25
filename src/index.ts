@@ -161,7 +161,10 @@ export const readText = async (options: ReadOptions = {}): Promise<string> => {
  * where image copying is unsupported, the payload is not an image,
  * or the browser denies the write.
  */
-export const copyImage = async (source: Blob | string, options: ReadOptions = {}): Promise<void> => {
+export const copyImage = async (
+  source: Blob | string | (() => Promise<Blob>),
+  options: ReadOptions & { type?: string } = {},
+): Promise<void> => {
   throwIfAborted(options.signal);
 
   if (
@@ -170,6 +173,37 @@ export const copyImage = async (source: Blob | string, options: ReadOptions = {}
     typeof ClipboardItem === 'undefined'
   ) {
     throw new FerryError('UNSUPPORTED', 'ferry: copying images is not supported in this environment');
+  }
+
+  // Safari requires ClipboardItem to be constructed while the user gesture is
+  // still active, so factories may be handed straight through as Promise payloads.
+  if (typeof source === 'function') {
+    const { type, signal } = options;
+    throwIfAborted(signal);
+    if (!type) {
+      throw new FerryError(
+        'INVALID_PAYLOAD',
+        'ferry: an async image factory requires an explicit "type" option for Safari compatibility',
+      );
+    }
+
+    let promise: Promise<Blob>;
+    try {
+      promise = source();
+    } catch {
+      throw new FerryError('INVALID_PAYLOAD', 'ferry: the image factory threw synchronously');
+    }
+    promise.catch(() => {}); // avoid unhandled rejections when the clipboard ignores it
+
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ [type]: promise })]);
+      return;
+    } catch {
+      throw new FerryError(
+        'PERMISSION_DENIED',
+        'ferry: the clipboard rejected this image payload or permission was denied',
+      );
+    }
   }
 
   let blob: Blob;
