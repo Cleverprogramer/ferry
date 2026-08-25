@@ -27,6 +27,14 @@ Reads the clipboard's current text content. Rejects with an `Error` when reading
 const pasted = await readText();
 ```
 
+### `copyImage(source: Blob | string): Promise<void>`
+Copies an image to the clipboard. Pass a `Blob` directly, or a URL string which ferry fetches and converts for you. Rejects when image copying is unsupported, the payload is not an image, or permission is denied.
+
+```ts
+await copyImage(canvasOrFileBlob);
+await copyImage('https://example.com/cat.png');
+```
+
 ## Examples
 
 ### Text
