@@ -9,6 +9,26 @@ Ships dual **ESM + CJS** bundles with TypeScript declarations — works with `im
 
 🎮 **[Try the live playground →](https://cleverprogramer.github.io/ferry/)**
 
+## Install
+
+npm registry publishing is coming — until then, install straight from GitHub:
+
+```bash
+# from this repo (latest main)
+bun add github:Cleverprogramer/ferry
+npm i github:Cleverprogramer/ferry
+yarn add github:Cleverprogramer/ferry
+```
+
+Or drop it into any page via jsDelivr's GitHub CDN — no build tools needed:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/Cleverprogramer/ferry@main/dist/ferry.global.js"></script>
+<script>
+  Ferry.copyToClipboard('hello!');
+</script>
+```
+
 ## API
 
 ### `copyToClipboard(content: string, richHtml?: boolean | CopyOptions): Promise<void>`
