@@ -6,14 +6,36 @@ A tiny zero-dependency browser utility that ferries text and rich HTML onto the 
 Built and managed with [bun](https://bun.sh).
 
 ## API
-`copyToClipboard(content: string, richHtml: boolean)`
+
+### `copyToClipboard(content: string, richHtml?: boolean): Promise<void>`
+Copies text (or rich HTML when `richHtml` is `true`) to the clipboard. Rejects with an `Error` if copying fails or the environment has no clipboard support.
+
+### `isSupported(): boolean`
+Returns `true` if any clipboard strategy (async Clipboard API or `execCommand` fallback) is available. Safe to call in SSR/Node environments.
 
 ## Examples
 
 ### Text
 
-`copyToClipboard('This is normal text')`
+`await copyToClipboard('This is normal text')`
 
 ### Rich text
 
-`copyToClipboard('This text has a <b>bold</b> element and a <a href="https://google.com">link</a>', true)`
+`await copyToClipboard('<b>bold</b> element and a <a href="https://google.com">link</a>', true)`
+
+### Feature detection
+
+```ts
+if (!isSupported()) {
+  showFallbackUi();
+}
+```
+
+## Development
+
+```bash
+bun install
+bun test          # run unit tests (happy-dom)
+bun run build     # emit dist/
+```
+
