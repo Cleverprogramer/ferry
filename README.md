@@ -178,6 +178,16 @@ try {
 }
 ```
 
+## Contributing
+
+Every meaningful PR should include a changeset so releases are generated automatically:
+
+```bash
+bunx changeset   # choose patch/minor/major and write a short summary
+```
+
+Commit the generated `.changeset/*.md` file with your PR. On merge to `main`, changesets accumulates entries; a maintainers-only release step turns them into version bumps + CHANGELOG.md.
+
 ## Development
 
 ```bash
