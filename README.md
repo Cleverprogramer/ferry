@@ -5,6 +5,8 @@
 A tiny zero-dependency browser utility that ferries text and rich HTML onto the clipboard.
 Built and managed with [bun](https://bun.sh).
 
+Ships dual **ESM + CJS** bundles with TypeScript declarations — works with `import`, `require()`, bundlers, and CDNs.
+
 ## API
 
 ### `copyToClipboard(content: string, richHtml?: boolean | CopyOptions): Promise<void>`
