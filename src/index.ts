@@ -1,8 +1,30 @@
-export const copyToClipboard = (content: string, richHtml = false) => {
-  if (!richHtml && navigator.clipboard) {
-    navigator.clipboard.writeText(content);
+/**
+ * Detects whether any clipboard strategy is available in the current environment.
+ * Safe to call in non-browser (SSR/Node) contexts.
+ */
+export const isSupported = (): boolean => {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    return true;
+  }
+  return typeof document !== 'undefined' && typeof document.execCommand === 'function';
+};
+
+/**
+ * Copies content to the clipboard.
+ * Prefers the async Clipboard API and falls back to a hidden textarea +
+ * document.execCommand('copy'). Rejects with an Error when copying fails
+ * or the environment offers no clipboard support.
+ */
+export const copyToClipboard = async (content: string, richHtml = false): Promise<void> => {
+  if (!isSupported()) {
+    throw new Error('ferry: no clipboard support detected in this environment');
+  }
+
+  if (!richHtml && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(content);
     return;
   }
+
   const textArea = document.createElement('textarea');
   textArea.style.maxHeight = '0';
   textArea.style.height = '0';
@@ -20,15 +42,17 @@ export const copyToClipboard = (content: string, richHtml = false) => {
     }
   };
 
-  const copy = () => document.execCommand('copy');
-
-  if (richHtml) {
+  let succeeded = false;
+  try {
     document.addEventListener('copy', listener);
-    copy();
+    succeeded = document.execCommand('copy');
+  } finally {
     document.removeEventListener('copy', listener);
-  } else {
-    copy();
+    document.body.removeChild(textArea);
   }
 
-  document.body.removeChild(textArea);
+  if (!succeeded) {
+    throw new Error('ferry: execCommand("copy") fallback failed');
+  }
 };
+
