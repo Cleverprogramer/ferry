@@ -42,6 +42,8 @@ export interface RichCopyOptions {
   text?: string;
   /** Abort the operation before or while it runs */
   signal?: AbortSignal;
+  /** Force a strategy: 'auto' (default), 'async' (Clipboard API only), or 'fallback' (execCommand only) */
+  prefer?: 'auto' | 'async' | 'fallback';
 }
 
 export type CopyOptions = boolean | RichCopyOptions;
@@ -89,10 +91,24 @@ export const copyToClipboard = async (content: string, options: CopyOptions = fa
   const explicit = typeof options === 'object' && options !== null ? options : {};
   const html = explicit.html ?? (richHtml ? content : undefined);
   const text = explicit.text ?? content;
+  const preferAsync =
+    explicit.prefer === 'auto' || explicit.prefer === 'async' || explicit.prefer === undefined;
 
-  if (!richHtml && !explicit.html && typeof navigator.clipboard?.writeText === 'function') {
+  if (
+    preferAsync &&
+    !richHtml &&
+    !explicit.html &&
+    typeof navigator.clipboard?.writeText === 'function'
+  ) {
     await navigator.clipboard.writeText(text);
     return;
+  }
+
+  if (!preferAsync && typeof document.execCommand !== 'function') {
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: prefer "fallback" was requested but execCommand is not available',
+    );
   }
 
   const textArea = document.createElement('textarea');
