@@ -79,3 +79,25 @@ export const copyToClipboard = async (content: string, options: CopyOptions = fa
   }
 };
 
+/**
+ * Reads the current text content of the clipboard.
+ * Requires the async Clipboard API and read permission; rejects with a
+ * descriptive Error where reading is unsupported or denied.
+ */
+export const readText = async (): Promise<string> => {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.readText !== 'function'
+  ) {
+    throw new Error('ferry: reading the clipboard is not supported in this environment');
+  }
+
+  try {
+    return await navigator.clipboard.readText();
+  } catch {
+    throw new Error(
+      'ferry: clipboard read was blocked by the browser or denied by the user',
+    );
+  }
+};
+
