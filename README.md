@@ -43,6 +43,12 @@ await copyImage(canvasOrFileBlob);
 await copyImage('https://example.com/cat.png');
 ```
 
+Safari quirk: `ClipboardItem` must be constructed during the user gesture. Pass an async factory plus an explicit `type` and ferry hands the promise straight through:
+
+```ts
+await copyImage(() => renderCanvasToBlob(), { type: 'image/png' });
+```
+
 ## Examples
 
 ### Text
