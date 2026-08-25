@@ -26,9 +26,9 @@ describe('AbortSignal support', () => {
     const controller = new AbortController();
     controller.abort();
 
-    await expect(
-      copyToClipboard('x', { signal: controller.signal }),
-    ).rejects.toMatchObject({ code: 'ABORTED' });
+    await expect(copyToClipboard('x', { signal: controller.signal })).rejects.toMatchObject({
+      code: 'ABORTED',
+    });
   });
 
   it('does not touch the clipboard when aborted', async () => {
@@ -74,7 +74,9 @@ describe('copyImage async factories (Safari-safe)', () => {
     const captured: Array<Record<string, unknown>> = [];
     Object.defineProperty(globalThis.navigator, 'clipboard', {
       configurable: true,
-      value: { write: async (items: Array<Record<string, unknown>>) => void captured.push(...items) },
+      value: {
+        write: async (items: Array<Record<string, unknown>>) => void captured.push(...items),
+      },
     });
     const blob = new Blob(['x'], { type: 'image/png' });
 

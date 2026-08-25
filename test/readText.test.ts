@@ -22,9 +22,7 @@ describe('readText', () => {
   it('rejects when no read capability exists', async () => {
     setClipboard({ writeText: async () => {} });
 
-    await expect(readText()).rejects.toThrow(
-      'ferry: reading the clipboard is not supported',
-    );
+    await expect(readText()).rejects.toThrow('ferry: reading the clipboard is not supported');
   });
 
   it('rejects with a permission-oriented error when the browser blocks reading', async () => {
