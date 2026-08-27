@@ -3,28 +3,54 @@
   "version": "0.2.0",
   "description": "Tiny zero-dependency browser utility that ferries text and rich HTML onto the clipboard",
   "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       },
       "default": "./dist/index.js"
     },
+    "./react": {
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.js"
+      },
+      "require": {
+        "types": "./dist/react.d.cts",
+        "default": "./dist/react.cjs"
+      },
+      "default": "./dist/react.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts",
-    "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs",
+    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts && bun scripts/fix-declarations.mjs",
+    "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && bun build src/use-clipboard.ts --external react --format esm --outfile dist/react.js && bun build src/use-clipboard.ts --external react --format cjs --outfile dist/react.cjs",
     "build:cdn": "bun build src/cdn.ts --outfile dist/ferry.global.js --format=iife",
     "test": "bun test",
     "test:e2e": "playwright test",
@@ -34,7 +60,7 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,js,mjs}": [
+    "*.{ts,tsx,js,mjs}": [
       "prettier --write",
       "eslint --fix"
     ],
@@ -49,10 +75,14 @@
     "@commitlint/config-conventional": "^21.2.2",
     "@happy-dom/global-registrator": "^20.11.6",
     "@playwright/test": "^1.62.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.18",
     "eslint": "^10.9.1",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
     "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.68.0"
   }

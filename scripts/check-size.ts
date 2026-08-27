@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 const budgets: Array<[string, number]> = [
   ['dist/index.js', 2048],
   ['dist/index.cjs', 2560],
+  ['dist/react.js', 4096],
+  ['dist/react.cjs', 5120],
   ['dist/ferry.global.js', 4096],
 ];
 
