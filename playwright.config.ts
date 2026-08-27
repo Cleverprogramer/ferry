@@ -2,7 +2,8 @@ import pkg from '@playwright/test';
 const { defineConfig } = pkg;
 
 export default defineConfig({
-  testDir: './test/e2e',
+  testDir: './e2e',
+  testMatch: '**/*.pw.ts',
   timeout: 30000,
   fullyParallel: true,
   use: {
