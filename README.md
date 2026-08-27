@@ -160,6 +160,23 @@ No bundler? Use the global build — the full API hangs off `window.Ferry`:
 </script>
 ```
 
+## React (optional)
+
+`react >=17` is an optional peer dependency — the core library stays zero-dependency without it.
+
+```tsx
+import { useClipboard } from 'ferry/react';
+
+function CopyButton() {
+  const { copy, copied, error } = useClipboard();
+  return (
+    <button onClick={() => copy('hello')}>
+      {copied ? 'Copied!' : error ? 'Failed' : 'Copy'}
+    </button>
+  );
+}
+```
+
 ## Error handling
 
 Every API rejects with a `FerryError` carrying a stable `code`:
