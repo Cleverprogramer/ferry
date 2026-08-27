@@ -26,13 +26,13 @@ jobs:
       - name: Validate types (arethetypeswrong)
         # FalseESM is a known-safe artifact of shipping ESM-syntax declarations
         # for the CJS bundle; all exports are plain functions/classes.
-        run: bunx @arethetypeswrong/cli --pack --ignore-rules false-esm
+        # Profile matches our declared support floor (engines.node >=18): Node16+
+        # resolution + bundlers. false-esm tolerated as documented dual-format tradeoff.
+        run: bunx @arethetypeswrong/cli --pack --profile node16 --ignore-rules false-esm
       - name: Bundle size budget
         run: bun scripts/check-size.ts
       - name: Test with coverage
         run: bun test --coverage
-      - name: Test
-        run: bun test
       - name: Upload dist
         uses: actions/upload-artifact@v4
         with:

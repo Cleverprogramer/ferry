@@ -49,7 +49,7 @@
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts",
+    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts && bun scripts/fix-declarations.mjs",
     "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && bun build src/use-clipboard.ts --external react --format esm --outfile dist/react.js && bun build src/use-clipboard.ts --external react --format cjs --outfile dist/react.cjs",
     "build:cdn": "bun build src/cdn.ts --outfile dist/ferry.global.js --format=iife",
     "test": "bun test",
