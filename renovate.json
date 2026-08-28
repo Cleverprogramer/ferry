@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits"],
+  "schedule": ["before 6am on Monday"],
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "Automerge dev-dependency patch and minor updates",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group bun and typescript bumps",
+      "matchPackageNames": ["typescript"],
+      "automerge": false
+    }
+  ]
+}
