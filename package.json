@@ -54,6 +54,8 @@
     "build:cdn": "bun build src/cdn.ts --outfile dist/ferry.global.js --format=iife",
     "test": "bun test",
     "test:e2e": "playwright test",
+    "cs:version": "changeset version && bun install",
+    "cs:tag": "changeset tag",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
