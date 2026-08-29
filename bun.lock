@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "ferry",
@@ -21,6 +22,12 @@
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.68.0",
       },
+      "peerDependencies": {
+        "react": ">=17",
+      },
+      "optionalPeers": [
+        "react",
+      ],
     },
   },
   "packages": {
