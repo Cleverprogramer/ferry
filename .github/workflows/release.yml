@@ -59,7 +59,9 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Tag released versions
-        run: bun run cs:tag
-      - name: Push tags
-        run: git push origin --tags
+      - name: Tag released version
+        run: |
+          VERSION=$(bun -p "require('./package.json').version")
+          echo "tagging v$VERSION"
+          git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null || git tag "v$VERSION"
+          git push origin "v$VERSION"
