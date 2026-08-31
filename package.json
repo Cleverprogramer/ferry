@@ -64,7 +64,7 @@
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts && cp dist/use-clipboard-vue.d.ts dist/vue.d.ts && cp dist/use-clipboard-vue.d.ts dist/vue.d.cts && bun scripts/fix-declarations.mjs",
+    "build": "bun run build:modules && bun run build:playground && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts && cp dist/use-clipboard-vue.d.ts dist/vue.d.ts && cp dist/use-clipboard-vue.d.ts dist/vue.d.cts && bun scripts/fix-declarations.mjs",
     "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && bun build src/use-clipboard.ts --external react --format esm --outfile dist/react.js && bun build src/use-clipboard.ts --external react --format cjs --outfile dist/react.cjs && bun build src/use-clipboard-vue.ts --external vue --format esm --outfile dist/vue.js && bun build src/use-clipboard-vue.ts --external vue --format cjs --outfile dist/vue.cjs",
     "build:cdn": "bun build src/cdn.ts --outfile dist/ferry.global.js --format=iife",
     "test": "bun test",
@@ -74,7 +74,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:playground": "bun run build:cdn && bun build playground/react-demo.ts --outfile playground/react-demo.bundle.js --target=browser --minify"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs}": [

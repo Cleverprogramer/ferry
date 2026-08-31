@@ -1,6 +1,7 @@
 node_modules/
 dist/
 _site/
+playground/react-demo.bundle.js
 test-results/
 playwright-report/
 *.log
