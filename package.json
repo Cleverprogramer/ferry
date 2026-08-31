@@ -34,23 +34,38 @@
       },
       "default": "./dist/react.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./vue": {
+      "import": {
+        "types": "./dist/vue.d.ts",
+        "default": "./dist/vue.js"
+      },
+      "require": {
+        "types": "./dist/vue.d.cts",
+        "default": "./dist/vue.cjs"
+      },
+      "default": "./dist/vue.js"
+    }
   },
   "files": [
     "dist"
   ],
   "peerDependencies": {
-    "react": ">=17"
+    "react": ">=17",
+    "vue": ">=3.3"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts && bun scripts/fix-declarations.mjs",
-    "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && bun build src/use-clipboard.ts --external react --format esm --outfile dist/react.js && bun build src/use-clipboard.ts --external react --format cjs --outfile dist/react.cjs",
+    "build": "bun run build:modules && bun run build:cdn && tsc --emitDeclarationOnly && cp dist/index.d.ts dist/index.d.cts && cp dist/use-clipboard.d.ts dist/react.d.ts && cp dist/use-clipboard.d.ts dist/react.d.cts && cp dist/use-clipboard-vue.d.ts dist/vue.d.ts && cp dist/use-clipboard-vue.d.ts dist/vue.d.cts && bun scripts/fix-declarations.mjs",
+    "build:modules": "bun build src/index.ts --format esm --outfile dist/index.js && bun build src/index.ts --format cjs --outfile dist/index.cjs && bun build src/use-clipboard.ts --external react --format esm --outfile dist/react.js && bun build src/use-clipboard.ts --external react --format cjs --outfile dist/react.cjs && bun build src/use-clipboard-vue.ts --external vue --format esm --outfile dist/vue.js && bun build src/use-clipboard-vue.ts --external vue --format cjs --outfile dist/vue.cjs",
     "build:cdn": "bun build src/cdn.ts --outfile dist/ferry.global.js --format=iife",
     "test": "bun test",
     "test:e2e": "playwright test",
@@ -86,6 +101,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.68.0"
+    "typescript-eslint": "^8.68.0",
+    "vue": "^3.5.42"
   }
 }

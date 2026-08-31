@@ -160,6 +160,24 @@ No bundler? Use the global build — the full API hangs off `window.Ferry`:
 </script>
 ```
 
+## Vue (optional)
+
+`vue >=3.3` is an optional peer dependency — the core library stays zero-dependency without it.
+
+```vue
+<script setup lang="ts">
+import { useClipboard } from 'ferry/vue';
+
+const { copy, copied, error } = useClipboard();
+</script>
+
+<template>
+  <button @click="copy('hello')">
+    {{ copied ? 'Copied!' : error ? 'Failed' : 'Copy' }}
+  </button>
+</template>
+```
+
 ## React (optional)
 
 `react >=17` is an optional peer dependency — the core library stays zero-dependency without it.
