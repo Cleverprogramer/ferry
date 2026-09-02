@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "ferry",
@@ -24,9 +25,11 @@
       },
       "peerDependencies": {
         "react": ">=17",
+        "vue": ">=3.3",
       },
       "optionalPeers": [
         "react",
+        "vue",
       ],
     },
   },
