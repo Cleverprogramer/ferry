@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml/badge.svg)](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3fb950.svg)](LICENSE)
-![Bundle size](https://img.shields.io/badge/gzipped-%3C2_kB-2f81f7)
+![Bundle size](https://img.shields.io/badge/gzipped-~2_kB-2f81f7)
 
 `import {copyToClipboard} from 'ferry'`
 
@@ -66,6 +66,15 @@ await copyToClipboard('<b>bold</b>', { html: '<b>bold</b>', text: 'bold' });
 
 ### `isSupported(): boolean`
 Returns `true` if any clipboard strategy (async Clipboard API or `execCommand` fallback) is available. Safe to call in SSR/Node environments.
+
+### `getCapabilities(): FerryCapabilities`
+Fine-grained support detection — branch on concrete features instead of user agents:
+
+```ts
+const caps = getCapabilities();
+// { asyncWrite, asyncRead, asyncItems, execCommand, permissionsApi }
+if (!caps.asyncItems) showToast('Image copy needs a newer browser');
+```
 
 ### `readText(): Promise<string>`
 Reads the clipboard's current text content. Rejects with an `Error` when reading is unsupported or permission is denied.
