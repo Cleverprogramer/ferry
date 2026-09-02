@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 
 // gzip size budgets in bytes
 const budgets: Array<[string, number]> = [
-  ['dist/index.js', 2048],
-  ['dist/index.cjs', 2560],
+  ['dist/index.js', 2304],
+  ['dist/index.cjs', 2816],
   ['dist/react.js', 4096],
   ['dist/react.cjs', 5120],
   ['dist/ferry.global.js', 4096],

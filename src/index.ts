@@ -64,12 +64,6 @@ const throwIfAborted = (signal?: AbortSignal): void => {
  * Detects whether any clipboard strategy is available in the current environment.
  * Safe to call in non-browser (SSR/Node) contexts.
  */
-export const isSupported = (): boolean => {
-  if (typeof navigator !== 'undefined' && typeof navigator.clipboard?.writeText === 'function') {
-    return true;
-  }
-  return typeof document !== 'undefined' && typeof document.execCommand === 'function';
-};
 
 /**
  * Copies content to the clipboard.
@@ -390,4 +384,43 @@ export const readFiles = async (options: ReadOptions = {}): Promise<File[]> => {
   }
 
   return files;
+};
+
+/**
+ * Fine-grained view of what the current environment supports, so apps can
+ * branch on concrete features instead of parsing user agents.
+ * Safe to call in non-browser (SSR/Node) contexts.
+ */
+export interface FerryCapabilities {
+  /** navigator.clipboard.writeText is available (async text writes and clear) */
+  asyncWrite: boolean;
+  /** navigator.clipboard.readText is available */
+  asyncRead: boolean;
+  /** navigator.clipboard.read + ClipboardItem are available (image/file APIs) */
+  asyncItems: boolean;
+  /** document.execCommand('copy') fallback is available */
+  execCommand: boolean;
+  /** navigator.permissions.query is available (queryPermission works) */
+  permissionsApi: boolean;
+}
+
+export const getCapabilities = (): FerryCapabilities => {
+  const nav = (globalThis as { navigator?: Navigator }).navigator;
+  const clip = nav?.clipboard;
+  return {
+    asyncWrite: typeof clip?.writeText === 'function',
+    asyncRead: typeof clip?.readText === 'function',
+    asyncItems: typeof clip?.read === 'function' && typeof ClipboardItem !== 'undefined',
+    execCommand: typeof document !== 'undefined' && typeof document.execCommand === 'function',
+    permissionsApi: typeof nav?.permissions?.query === 'function',
+  };
+};
+
+/**
+ * Detects whether any clipboard strategy is available in the current environment.
+ * Safe to call in non-browser (SSR/Node) contexts.
+ */
+export const isSupported = (): boolean => {
+  const caps = getCapabilities();
+  return caps.asyncWrite || caps.execCommand;
 };
