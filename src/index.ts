@@ -424,3 +424,30 @@ export const isSupported = (): boolean => {
   const caps = getCapabilities();
   return caps.asyncWrite || caps.execCommand;
 };
+
+/** Result of a clipboard permission query. */
+export type FerryPermissionState = 'granted' | 'denied' | 'prompt' | 'unsupported';
+
+/**
+ * Queries the current clipboard permission state via the Permissions API.
+ * Returns 'unsupported' where the Permissions API is missing or rejects,
+ * which is common outside secure contexts and in older browsers.
+ */
+export const queryPermission = async (
+  action: 'read' | 'write' = 'write',
+): Promise<FerryPermissionState> => {
+  if (typeof navigator === 'undefined' || typeof navigator.permissions?.query !== 'function') {
+    return 'unsupported';
+  }
+
+  try {
+    // lib.dom's PermissionName does not include the clipboard-* names yet
+    const descriptor = {
+      name: action === 'read' ? 'clipboard-read' : 'clipboard-write',
+    } as unknown as PermissionDescriptor;
+    const status = await navigator.permissions.query(descriptor);
+    return status.state as FerryPermissionState;
+  } catch {
+    return 'unsupported';
+  }
+};

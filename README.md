@@ -76,6 +76,15 @@ const caps = getCapabilities();
 if (!caps.asyncItems) showToast('Image copy needs a newer browser');
 ```
 
+### `queryPermission(action?: 'read' | 'write'): Promise<FerryPermissionState>`
+Surfaces the #1 silent failure mode — a denied permission — before it bites:
+
+```ts
+const state = await queryPermission('write');
+// 'granted' | 'denied' | 'prompt' | 'unsupported'
+if (state === 'denied') showPermissionHelp();
+```
+
 ### `readText(): Promise<string>`
 Reads the clipboard's current text content. Rejects with an `Error` when reading is unsupported or permission is denied.
 
