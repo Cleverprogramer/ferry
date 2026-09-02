@@ -34,6 +34,7 @@ jobs:
           mkdir -p _site
           cp playground/index.html _site/
           cp playground/react-demo.bundle.js _site/
+          cp playground/vue-demo.bundle.js _site/
           cp dist/ferry.global.js _site/
       - name: Configure Pages
         uses: actions/configure-pages@v5

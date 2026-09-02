@@ -17,8 +17,8 @@ const server = createServer(async (req, res) => {
     if (urlPath.endsWith('/ferry.global.js')) {
       urlPath = '/dist/ferry.global.js';
     }
-    if (urlPath === '/react-demo.bundle.js') {
-      urlPath = '/playground/react-demo.bundle.js';
+    if (urlPath.endsWith('.bundle.js')) {
+      urlPath = `/playground${urlPath}`;
     }
     // Prevent path traversal
     const file = normalize(join(ROOT, urlPath === '/' ? 'playground/index.html' : urlPath));
