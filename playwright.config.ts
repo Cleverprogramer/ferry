@@ -11,7 +11,7 @@ export default defineConfig({
     viewport: { width: 1000, height: 800 },
   },
   webServer: {
-    command: 'bun run build:cdn && bun scripts/serve-static.mjs',
+    command: 'bun run build:playground && bun scripts/serve-static.mjs',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 60000,
