@@ -17,12 +17,12 @@ bun run test:e2e                  # starts static server + runs specs
 
 ## Architecture
 
-- `playwright.config.ts` — chromium project only; `webServer` builds the CDN
+- `playwright.config.ts` (testDir `./e2e`, `*.pw.ts` specs) — chromium project only; `webServer` builds the CDN
   bundle (`bun run build:cdn`) then starts `scripts/serve-static.mjs` on
   port 4173 with `reuseExistingServer` outside CI.
 - `scripts/serve-static.mjs` — zero-dependency static server; maps
   `/ferry.global.js` to `dist/ferry.global.js`; path-traversal guarded.
-- Specs live in `test/e2e/*.spec.ts` and drive `playground/index.html`.
+- Specs live in `e2e/*.pw.ts` (e.g. `playground.pw.ts`, `adapters.pw.ts`) and drive `playground/index.html`.
 
 ## Clipboard specifics
 
