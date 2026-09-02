@@ -75,7 +75,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "build:playground": "bun run build:cdn && bun build playground/react-demo.ts --outfile playground/react-demo.bundle.js --target=browser --minify"
+    "build:playground": "bun run build:cdn && bun build playground/react-demo.ts --format=iife --outfile playground/react-demo.bundle.js --target=browser --minify && bun build playground/vue-demo.ts --format=iife --outfile playground/vue-demo.bundle.js --target=browser --minify"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs}": [
