@@ -23,18 +23,10 @@ export class FerryError extends Error {
 }
 
 /**
- * Granular control over what lands in each clipboard slot.
- * When omitted, `text` defaults to `content` and `html` defaults to
+ * Granular control over what lands in each clipboard slot, plus delivery
+ * tuning. When omitted, `text` defaults to `content` and `html` defaults to
  * `content` for rich copies (`options === true`).
  */
-export interface RichCopyOptions {
-  /** Markup written to the text/html slot */
-  html?: string;
-  /** Plain text written to the text/plain slot */
-  text?: string;
-}
-
-/** Either the legacy boolean (`true` = rich copy) or per-slot overrides. */
 export interface RichCopyOptions {
   /** Markup written to the text/html slot */
   html?: string;
@@ -44,6 +36,10 @@ export interface RichCopyOptions {
   signal?: AbortSignal;
   /** Force a strategy: 'auto' (default), 'async' (Clipboard API only), or 'fallback' (execCommand only) */
   prefer?: 'auto' | 'async' | 'fallback';
+  /** Extra attempts after the first try fails (default 0) */
+  retries?: number;
+  /** Base delay in ms before a retry; doubles each attempt (default 100) */
+  retryDelay?: number;
 }
 
 export type CopyOptions = boolean | RichCopyOptions;
@@ -88,51 +84,74 @@ export const copyToClipboard = async (
   const preferAsync =
     explicit.prefer === 'auto' || explicit.prefer === 'async' || explicit.prefer === undefined;
 
-  if (
-    preferAsync &&
-    !richHtml &&
-    !explicit.html &&
-    typeof navigator.clipboard?.writeText === 'function'
-  ) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
+  const attempt = async (): Promise<void> => {
+    throwIfAborted(explicit.signal);
 
-  if (!preferAsync && typeof document.execCommand !== 'function') {
-    throw new FerryError(
-      'UNSUPPORTED',
-      'ferry: prefer "fallback" was requested but execCommand is not available',
-    );
-  }
+    if (
+      preferAsync &&
+      !richHtml &&
+      !explicit.html &&
+      typeof navigator.clipboard?.writeText === 'function'
+    ) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
 
-  const textArea = document.createElement('textarea');
-  textArea.style.maxHeight = '0';
-  textArea.style.height = '0';
-  textArea.style.opacity = '0';
-  textArea.value = text;
-  document.body.appendChild(textArea);
-  textArea.select();
+    if (typeof document.execCommand !== 'function') {
+      throw new FerryError(
+        'UNSUPPORTED',
+        'ferry: prefer "fallback" was requested but execCommand is not available',
+      );
+    }
 
-  const listener = (e: ClipboardEvent) => {
-    e.preventDefault();
+    const textArea = document.createElement('textarea');
+    textArea.style.maxHeight = '0';
+    textArea.style.height = '0';
+    textArea.style.opacity = '0';
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
 
-    if (e.clipboardData) {
-      e.clipboardData.setData('text/html', html as string);
-      e.clipboardData.setData('text/plain', text);
+    const listener = (e: ClipboardEvent) => {
+      e.preventDefault();
+
+      if (e.clipboardData) {
+        e.clipboardData.setData('text/html', html as string);
+        e.clipboardData.setData('text/plain', text);
+      }
+    };
+
+    let succeeded = false;
+    try {
+      document.addEventListener('copy', listener);
+      succeeded = document.execCommand('copy');
+    } finally {
+      document.removeEventListener('copy', listener);
+      document.body.removeChild(textArea);
+    }
+
+    if (!succeeded) {
+      throw new FerryError('COPY_FAILED', 'ferry: execCommand("copy") fallback failed');
     }
   };
 
-  let succeeded = false;
-  try {
-    document.addEventListener('copy', listener);
-    succeeded = document.execCommand('copy');
-  } finally {
-    document.removeEventListener('copy', listener);
-    document.body.removeChild(textArea);
-  }
+  const attempts = Math.max(0, Math.floor(explicit.retries ?? 0)) + 1;
+  const baseDelay = Math.max(0, explicit.retryDelay ?? 100);
 
-  if (!succeeded) {
-    throw new FerryError('COPY_FAILED', 'ferry: execCommand("copy") fallback failed');
+  for (let round = 0; round < attempts; round++) {
+    try {
+      await attempt();
+      return;
+    } catch (err) {
+      const code = err instanceof FerryError ? err.code : undefined;
+      const fatal = code === 'ABORTED' || code === 'UNSUPPORTED' || code === 'INVALID_PAYLOAD';
+      if (fatal || round === attempts - 1) {
+        throw err;
+      }
+      if (baseDelay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, baseDelay * 2 ** round));
+      }
+    }
   }
 };
 

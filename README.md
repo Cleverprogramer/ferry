@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml/badge.svg)](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3fb950.svg)](LICENSE)
-![Bundle size](https://img.shields.io/badge/gzipped-~2_kB-2f81f7)
+![Bundle size](https://img.shields.io/badge/gzipped-%3C2.5_kB-2f81f7)
 
 `import {copyToClipboard} from 'ferry'`
 
@@ -62,6 +62,12 @@ Pass an options object to control each clipboard slot independently:
 ```ts
 // Rich editors get markup; plain editors get clean text
 await copyToClipboard('<b>bold</b>', { html: '<b>bold</b>', text: 'bold' });
+```
+
+Kiosk and POS environments see flaky clipboard access — opt into retries with exponential backoff (`ABORTED`, `UNSUPPORTED`, and `INVALID_PAYLOAD` always fail fast):
+
+```ts
+await copyToClipboard(text, { retries: 3, retryDelay: 100 });
 ```
 
 ### `isSupported(): boolean`
