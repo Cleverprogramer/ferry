@@ -65,3 +65,12 @@ jobs:
           echo "tagging v$VERSION"
           git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null || git tag "v$VERSION"
           git push origin "v$VERSION"
+      - name: Draft the GitHub release
+        # Tag pushes made with GITHUB_TOKEN do not trigger other workflows,
+        # so the draft release is created here instead of by draft-release.yml
+        # (which still covers manually pushed tags).
+        run: |
+          VERSION=$(bun -p "require('./package.json').version")
+          gh release create "v$VERSION" --draft --generate-notes --title "ferry v$VERSION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
