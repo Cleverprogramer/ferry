@@ -17,16 +17,26 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       count: ${{ steps.detect.outputs.count }}
+      version-pr-open: ${{ steps.vpr.outputs.version-pr-open }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - id: detect
         run: |
           count=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l | tr -d ' ')
           echo "count=$count" >> "$GITHUB_OUTPUT"
+      - id: vpr
+        # A queued run can start after the previous run already opened the
+        # Version Packages PR but before it was merged; without this check it
+        # would open a duplicate (see #87).
+        run: |
+          open=$(gh pr list --head changeset-release/main --state open --json id --jq 'length')
+          echo "version-pr-open=$open" >> "$GITHUB_OUTPUT"
 
   version-pr:
     needs: detect
-    if: needs.detect.outputs.count != '0'
+    if: needs.detect.outputs.count != '0' && needs.detect.outputs.version-pr-open == '0'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
