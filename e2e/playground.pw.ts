@@ -62,3 +62,23 @@ test('clear() wipes the clipboard', async ({ page }) => {
   expect(text).toBe('');
   await expect(page.locator('#outJson')).toContainText('cleared');
 });
+
+test.describe('capabilities panel', () => {
+  test.beforeEach(async ({ context, page }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'], {
+      origin: 'http://127.0.0.1:4173',
+    });
+    await page.goto('/');
+  });
+
+  test('lists concrete capability flags', async ({ page }) => {
+    const out = page.locator('#caps-out');
+    await expect(out).toContainText('asyncWrite');
+    await expect(out).toContainText('asyncItems');
+    await expect(out).toContainText('permissionsApi');
+  });
+
+  test('shows a live clipboard permission state', async ({ page }) => {
+    await expect(page.locator('#caps-out')).toContainText('clipboard-write');
+  });
+});
