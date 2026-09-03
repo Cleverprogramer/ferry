@@ -40,6 +40,8 @@ export interface RichCopyOptions {
   retries?: number;
   /** Base delay in ms before a retry; doubles each attempt (default 100) */
   retryDelay?: number;
+  /** Overall deadline in ms across all attempts; rejects ABORTED when exceeded (default 0 = none) */
+  timeout?: number;
 }
 
 export type CopyOptions = boolean | RichCopyOptions;
@@ -50,11 +52,25 @@ export interface ReadOptions {
   signal?: AbortSignal;
 }
 
+const abortError = (signal: AbortSignal): FerryError =>
+  signal.reason instanceof FerryError
+    ? signal.reason
+    : new FerryError('ABORTED', 'ferry: the operation was aborted');
+
 const throwIfAborted = (signal?: AbortSignal): void => {
-  if (signal?.aborted) {
-    throw new FerryError('ABORTED', 'ferry: the operation was aborted');
-  }
+  if (signal?.aborted) throw abortError(signal);
 };
+
+/** Reject as soon as the signal aborts, even if the underlying promise never settles. */
+const raceAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(abortError(signal));
+      return;
+    }
+    signal.addEventListener('abort', () => reject(abortError(signal)));
+    promise.then(resolve, reject);
+  });
 
 /**
  * Detects whether any clipboard strategy is available in the current environment.
@@ -71,21 +87,36 @@ export const copyToClipboard = async (
   content: string,
   options: CopyOptions = false,
 ): Promise<void> => {
-  throwIfAborted(typeof options === 'object' && options !== null ? options.signal : undefined);
-
   if (!isSupported()) {
     throw new FerryError('UNSUPPORTED', 'ferry: no clipboard support detected in this environment');
   }
 
   const richHtml = options === true;
   const explicit = typeof options === 'object' && options !== null ? options : {};
+
+  // Combine the caller's signal with the optional timeout into one deadline.
+  const deadline = new AbortController();
+  const onOuterAbort = () => deadline.abort();
+  if (explicit.signal?.aborted) deadline.abort();
+  else explicit.signal?.addEventListener('abort', onOuterAbort);
+  const timeoutId =
+    explicit.timeout &&
+    setTimeout(
+      () =>
+        deadline.abort(
+          new FerryError('ABORTED', `ferry: copy timed out after ${explicit.timeout}ms`),
+        ),
+      explicit.timeout,
+    );
+  throwIfAborted(deadline.signal);
+
   const html = explicit.html ?? (richHtml ? content : undefined);
   const text = explicit.text ?? content;
   const preferAsync =
     explicit.prefer === 'auto' || explicit.prefer === 'async' || explicit.prefer === undefined;
 
   const attempt = async (): Promise<void> => {
-    throwIfAborted(explicit.signal);
+    throwIfAborted(deadline.signal);
 
     if (
       preferAsync &&
@@ -138,20 +169,28 @@ export const copyToClipboard = async (
   const attempts = Math.max(0, Math.floor(explicit.retries ?? 0)) + 1;
   const baseDelay = Math.max(0, explicit.retryDelay ?? 100);
 
-  for (let round = 0; round < attempts; round++) {
-    try {
-      await attempt();
-      return;
-    } catch (err) {
-      const code = err instanceof FerryError ? err.code : undefined;
-      const fatal = code === 'ABORTED' || code === 'UNSUPPORTED' || code === 'INVALID_PAYLOAD';
-      if (fatal || round === attempts - 1) {
-        throw err;
-      }
-      if (baseDelay > 0) {
-        await new Promise((resolve) => setTimeout(resolve, baseDelay * 2 ** round));
+  try {
+    for (let round = 0; round < attempts; round++) {
+      try {
+        await raceAbort(attempt(), deadline.signal);
+        return;
+      } catch (err) {
+        const code = err instanceof FerryError ? err.code : undefined;
+        const fatal = code === 'ABORTED' || code === 'UNSUPPORTED' || code === 'INVALID_PAYLOAD';
+        if (fatal || round === attempts - 1) {
+          throw err;
+        }
+        if (baseDelay > 0) {
+          await raceAbort(
+            new Promise((resolve) => setTimeout(resolve, baseDelay * 2 ** round)),
+            deadline.signal,
+          );
+        }
       }
     }
+  } finally {
+    clearTimeout(timeoutId);
+    explicit.signal?.removeEventListener('abort', onOuterAbort);
   }
 };
 
