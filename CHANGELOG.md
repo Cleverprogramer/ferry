@@ -1,5 +1,11 @@
 # ferry
 
+## 0.5.0
+
+### Minor Changes
+
+- [#93](https://github.com/Cleverprogramer/ferry/pull/93) [`76f3f01`](https://github.com/Cleverprogramer/ferry/commit/76f3f014d208cf7f13ab75ed98e97086cb441882) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Add a timeout option to copyToClipboard: an overall deadline in ms across all retry attempts that rejects with an ABORTED FerryError when exceeded. Aborts now race in-flight writes and backoff waits, so a hanging clipboard can no longer stall a copy forever. Size budgets moved to the 2.8 kB tier.
+
 ## 0.4.1
 
 ### Patch Changes
