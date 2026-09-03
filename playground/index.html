@@ -76,6 +76,10 @@
     <script src="./react-demo.bundle.js"></script>
   </section>
   <section style="grid-column:1/-1">
+    <h2>🔍 capabilities — what this browser can do</h2>
+    <pre id="caps-out" class="out">checking capabilities…</pre>
+  </section>
+  <section style="grid-column:1/-1">
     <h2>🧩 useClipboard() — Vue composable (ferry/vue)</h2>
     <div id="vue-demo-root"></div>
     <script src="./vue-demo.bundle.js"></script>
@@ -97,6 +101,15 @@
     const el = $('supported');
     el.textContent = ok ? '● clipboard supported' : '● no clipboard support in this browser';
     el.className = 'badge' + (ok ? ' ok' : '');
+  }
+
+  async function refreshCapabilities() {
+    const caps = Ferry.getCapabilities();
+    const rows = Object.entries(caps).map(([k, v]) => k.padEnd(16) + (v ? '✅' : '❌'));
+    const mark = (state) => state === 'granted' ? '✅' : state === 'denied' ? '⛔' : state;
+    rows.push('clipboard-read'.padEnd(16) + mark(await Ferry.queryPermission('read')));
+    rows.push('clipboard-write'.padEnd(16) + mark(await Ferry.queryPermission('write')));
+    $('caps-out').textContent = rows.join('\n');
   }
 
   const actions = {
@@ -161,6 +174,7 @@
     b.addEventListener('click', () => actions[b.dataset.act]());
   });
   refreshSupport();
+  refreshCapabilities();
 </script>
 </body>
 </html>
