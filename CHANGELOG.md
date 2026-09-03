@@ -1,5 +1,11 @@
 # ferry
 
+## 0.4.1
+
+### Patch Changes
+
+- [#84](https://github.com/Cleverprogramer/ferry/pull/84) [`560980a`](https://github.com/Cleverprogramer/ferry/commit/560980a3cfc8c1d814f42ca004262114f728cf39) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Harden packaging: intermediate declaration files (use-clipboard.d.ts, use-clipboard-vue.d.ts) no longer ship in the npm tarball; prepublishOnly now runs tests, build, size budget, and a tarball audit before any publish.
+
 ## 0.4.0
 
 ### Minor Changes
