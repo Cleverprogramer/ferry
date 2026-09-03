@@ -31,6 +31,8 @@ jobs:
         run: bunx @arethetypeswrong/cli --pack --profile node16 --ignore-rules false-esm
       - name: Bundle size budget
         run: bun scripts/check-size.ts
+      - name: Package contents audit
+        run: bun scripts/check-package.ts
       - name: Test with coverage
         run: bun test --coverage
       - name: Upload dist

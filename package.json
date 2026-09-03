@@ -48,7 +48,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/use-clipboard.d.ts",
+    "!dist/use-clipboard-vue.d.ts"
   ],
   "peerDependencies": {
     "react": ">=17",
@@ -75,7 +77,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "build:playground": "bun run build:cdn && bun build playground/react-demo.ts --format=iife --outfile playground/react-demo.bundle.js --target=browser --minify && bun build playground/vue-demo.ts --format=iife --outfile playground/vue-demo.bundle.js --target=browser --minify"
+    "build:playground": "bun run build:cdn && bun build playground/react-demo.ts --format=iife --outfile playground/react-demo.bundle.js --target=browser --minify && bun build playground/vue-demo.ts --format=iife --outfile playground/vue-demo.bundle.js --target=browser --minify",
+    "check:package": "bun scripts/check-package.ts",
+    "prepublishOnly": "bun test && bun run build && bun scripts/check-size.ts && bun scripts/check-package.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs}": [
