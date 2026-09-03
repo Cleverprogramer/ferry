@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml/badge.svg)](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3fb950.svg)](LICENSE)
-![Bundle size](https://img.shields.io/badge/gzipped-%3C2.5_kB-2f81f7)
+![Bundle size](https://img.shields.io/badge/gzipped-%3C2.8_kB-2f81f7)
 
 `import {copyToClipboard} from 'ferry'`
 
@@ -68,6 +68,12 @@ Kiosk and POS environments see flaky clipboard access — opt into retries with 
 
 ```ts
 await copyToClipboard(text, { retries: 3, retryDelay: 100 });
+```
+
+Kiosks with wedged clipboards shouldn't hang your UI — give the whole operation a deadline (`ABORTED` rejects with `copy timed out after Nms`):
+
+```ts
+await copyToClipboard(text, { timeout: 3000, retries: 2, retryDelay: 100 });
 ```
 
 ### `isSupported(): boolean`
