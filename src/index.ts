@@ -120,10 +120,20 @@ export const copyToClipboard = async (
 
     if (
       preferAsync &&
-      !richHtml &&
-      !explicit.html &&
-      typeof navigator.clipboard?.writeText === 'function'
+      html !== undefined &&
+      typeof navigator.clipboard?.write === 'function' &&
+      typeof ClipboardItem === 'function'
     ) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([text], { type: 'text/plain' }),
+        }),
+      ]);
+      return;
+    }
+
+    if (preferAsync && html === undefined && typeof navigator.clipboard?.writeText === 'function') {
       await navigator.clipboard.writeText(text);
       return;
     }
