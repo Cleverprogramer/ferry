@@ -63,3 +63,42 @@ describe('useClipboard', () => {
     expect(result.current.error).toBeNull();
   });
 });
+
+describe('useClipboard options passthrough', () => {
+  it('retries transient failures when options.retries is set', async () => {
+    let calls = 0;
+    setClipboard({
+      writeText: async () => {
+        calls++;
+        if (calls < 3) throw new Error('transient');
+      },
+    });
+
+    const { result } = renderHook(() => useClipboard({ copiedTimeout: 0 }));
+    const ok = await act(async () => {
+      const value = await result.current.copy('x', { retries: 3, retryDelay: 1 });
+      return value;
+    });
+    expect(ok).toBe(true);
+    expect(calls).toBe(3);
+    await waitFor(() => expect(result.current.copied).toBe(true));
+  });
+
+  it('surfaces the final error when retries are exhausted', async () => {
+    let calls = 0;
+    setClipboard({
+      writeText: async () => {
+        calls++;
+        throw new Error('always down');
+      },
+    });
+
+    const { result } = renderHook(() => useClipboard({ copiedTimeout: 0 }));
+    await act(async () => {
+      await result.current.copy('x', { retries: 2, retryDelay: 1 });
+    });
+    expect(calls).toBe(3);
+    await waitFor(() => expect(result.current.error?.message).toBe('always down'));
+    expect(result.current.copied).toBe(false);
+  });
+});

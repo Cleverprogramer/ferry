@@ -69,3 +69,39 @@ describe('useClipboard (vue)', () => {
     expect(written).toEqual(['override']);
   });
 });
+
+describe('useClipboard (vue) options passthrough', () => {
+  it('retries transient failures when options.retries is set', async () => {
+    let calls = 0;
+    setClipboard({
+      writeText: async () => {
+        calls++;
+        if (calls < 3) throw new Error('transient');
+      },
+    });
+
+    const { copy, copied, error } = useClipboard({ copiedTimeout: 0 });
+    const ok = await copy('x', { retries: 3, retryDelay: 1 });
+    expect(ok).toBe(true);
+    expect(calls).toBe(3);
+    expect(copied.value).toBe(true);
+    expect(error.value).toBeNull();
+  });
+
+  it('surfaces the final error when retries are exhausted', async () => {
+    let calls = 0;
+    setClipboard({
+      writeText: async () => {
+        calls++;
+        throw new Error('always down');
+      },
+    });
+
+    const { copy, copied, error } = useClipboard({ copiedTimeout: 0 });
+    const ok = await copy('x', { retries: 2, retryDelay: 1 });
+    expect(ok).toBe(false);
+    expect(calls).toBe(3);
+    expect(copied.value).toBe(false);
+    expect(error.value?.message).toBe('always down');
+  });
+});
