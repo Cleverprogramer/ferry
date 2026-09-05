@@ -6,6 +6,8 @@ const budgets: Array<[string, number]> = [
   ['dist/index.cjs', 3328],
   ['dist/react.js', 4096],
   ['dist/react.cjs', 5120],
+  ['dist/svelte.js', 4096],
+  ['dist/svelte.cjs', 5120],
   ['dist/ferry.global.js', 4096],
 ];
 
