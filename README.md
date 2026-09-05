@@ -190,6 +190,22 @@ No bundler? Use the global build — the full API hangs off `window.Ferry`:
 </script>
 ```
 
+## Svelte (optional)
+
+`svelte >=3` is an optional peer dependency — plain `svelte/store` writables, so the same hook works across Svelte 3, 4, and 5.
+
+```svelte
+<script lang="ts">
+  import { useClipboard } from 'ferry/svelte';
+
+  const { copy, copied, error } = useClipboard();
+</script>
+
+<button on:click={() => copy('hello')}>
+  {$copied ? 'Copied!' : $error ? 'Failed' : 'Copy'}
+</button>
+```
+
 ## Vue (optional)
 
 `vue >=3.3` is an optional peer dependency — the core library stays zero-dependency without it.
