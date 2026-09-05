@@ -16,6 +16,7 @@ test('playground loads the ferry global', async ({ page }) => {
 
 test('copyToClipboard plain text round-trips through the real clipboard', async ({ page }) => {
   await page.locator('button[data-act="copyPlain"]').click();
+  await expect(page.locator('#outPlain')).toContainText('copied');
   const text = await page.evaluate(() => navigator.clipboard.readText());
   expect(text).toBe('hello from ferry! 🚢');
   await expect(page.locator('#outPlain')).toContainText('copied');
@@ -23,6 +24,7 @@ test('copyToClipboard plain text round-trips through the real clipboard', async 
 
 test('rich copy writes both text/html and text/plain slots', async ({ page }) => {
   await page.locator('button[data-act="copyRich"]').click();
+  await expect(page.locator('#outRich')).toContainText('copied');
   const result = await page.evaluate(async () => {
     const item = (await navigator.clipboard.read())[0];
     return {
@@ -37,6 +39,7 @@ test('rich copy writes both text/html and text/plain slots', async ({ page }) =>
 
 test('distinct-slot copy puts clean text in the plain slot', async ({ page }) => {
   await page.locator('button[data-act="copySlots"]').click();
+  await expect(page.locator('#outRich')).toContainText('distinct slots');
   const text = await page.evaluate(() => navigator.clipboard.readText());
   expect(text).not.toContain('<b>');
   expect(text).toContain('bold!');
@@ -44,6 +47,7 @@ test('distinct-slot copy puts clean text in the plain slot', async ({ page }) =>
 
 test('copyJson copies pretty JSON', async ({ page }) => {
   await page.locator('button[data-act="copyJson"]').click();
+  await expect(page.locator('#outJson')).toContainText('copied');
   const text = await page.evaluate(() => navigator.clipboard.readText());
   expect(text).toContain('"library"');
   expect(text).toContain('"deps"');
