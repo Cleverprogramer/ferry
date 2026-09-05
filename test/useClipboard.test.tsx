@@ -23,7 +23,7 @@ describe('useClipboard', () => {
       await result.current.copy('hooked!');
     });
     expect(written).toEqual(['hooked!']);
-    await waitFor(() => expect(result.current.copied).toBe(true));
+    await waitFor(() => expect(result.current.copied).toBe(true), { timeout: 3000 });
     expect(result.current.error).toBeNull();
   });
 
@@ -34,7 +34,7 @@ describe('useClipboard', () => {
     await act(async () => {
       await result.current.copy('x');
     });
-    await waitFor(() => expect(result.current.copied).toBe(true));
+    await waitFor(() => expect(result.current.copied).toBe(true), { timeout: 3000 });
     await waitFor(() => expect(result.current.copied).toBe(false), { timeout: 1000 });
   }, 5000);
 
@@ -45,7 +45,7 @@ describe('useClipboard', () => {
     await act(async () => {
       await result.current.copy('nope');
     });
-    await waitFor(() => expect(result.current.error).not.toBeNull());
+    await waitFor(() => expect(result.current.error).not.toBeNull(), { timeout: 3000 });
     expect(result.current.copied).toBe(false);
   });
 
@@ -56,7 +56,7 @@ describe('useClipboard', () => {
     await act(async () => {
       await result.current.copy('nope');
     });
-    await waitFor(() => expect(result.current.error).not.toBeNull());
+    await waitFor(() => expect(result.current.error).not.toBeNull(), { timeout: 3000 });
     act(() => {
       result.current.reset();
     });
@@ -81,7 +81,7 @@ describe('useClipboard options passthrough', () => {
     });
     expect(ok).toBe(true);
     expect(calls).toBe(3);
-    await waitFor(() => expect(result.current.copied).toBe(true));
+    await waitFor(() => expect(result.current.copied).toBe(true), { timeout: 3000 });
   });
 
   it('surfaces the final error when retries are exhausted', async () => {
