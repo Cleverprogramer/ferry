@@ -1,5 +1,13 @@
 # ferry
 
+## 0.6.0
+
+### Minor Changes
+
+- [#95](https://github.com/Cleverprogramer/ferry/pull/95) [`17631b6`](https://github.com/Cleverprogramer/ferry/commit/17631b62145c92f987257883021faf723af7d09e) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Rich copies (options.html or the boolean sugar) now write both slots asynchronously via ClipboardItem when the browser supports it, instead of always using the deprecated execCommand path. execCommand remains the fallback for older engines and prefer: 'fallback'.
+
+- [#96](https://github.com/Cleverprogramer/ferry/pull/96) [`8ecb4d9`](https://github.com/Cleverprogramer/ferry/commit/8ecb4d9c76598b98121f5de3d335e7cac58029fc) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Add ferry/svelte: a useClipboard adapter built on plain svelte/store writables, compatible with Svelte 3, 4, and 5 (svelte is an optional peer dependency). Ships dist/svelte.js, dist/svelte.cjs, and declarations; included in the tarball audit and size budgets.
+
 ## 0.5.0
 
 ### Minor Changes
