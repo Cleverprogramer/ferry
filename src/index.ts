@@ -62,8 +62,9 @@ const throwIfAborted = (signal?: AbortSignal): void => {
 };
 
 /** Reject as soon as the signal aborts, even if the underlying promise never settles. */
-const raceAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> =>
-  new Promise<T>((resolve, reject) => {
+const raceAbort = <T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> => {
+  if (!signal) return promise;
+  return new Promise<T>((resolve, reject) => {
     if (signal.aborted) {
       reject(abortError(signal));
       return;
@@ -71,6 +72,7 @@ const raceAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> =>
     signal.addEventListener('abort', () => reject(abortError(signal)));
     promise.then(resolve, reject);
   });
+};
 
 /**
  * Detects whether any clipboard strategy is available in the current environment.
@@ -220,8 +222,9 @@ export const readText = async (options: ReadOptions = {}): Promise<string> => {
   }
 
   try {
-    return await navigator.clipboard.readText();
-  } catch {
+    return await raceAbort(navigator.clipboard.readText(), options.signal);
+  } catch (err) {
+    if (err instanceof FerryError) throw err;
     throw new FerryError(
       'PERMISSION_DENIED',
       'ferry: clipboard read was blocked by the browser or denied by the user',
@@ -394,8 +397,9 @@ export const readImage = async (options: ReadOptions = {}): Promise<Blob> => {
 
   let items: ClipboardItem[];
   try {
-    items = await navigator.clipboard.read();
-  } catch {
+    items = await raceAbort(navigator.clipboard.read(), options.signal);
+  } catch (err) {
+    if (err instanceof FerryError) throw err;
     throw new FerryError(
       'PERMISSION_DENIED',
       'ferry: clipboard read was blocked by the browser or denied by the user',
@@ -433,8 +437,9 @@ export const readFiles = async (options: ReadOptions = {}): Promise<File[]> => {
 
   let items: ClipboardItem[];
   try {
-    items = await navigator.clipboard.read();
-  } catch {
+    items = await raceAbort(navigator.clipboard.read(), options.signal);
+  } catch (err) {
+    if (err instanceof FerryError) throw err;
     throw new FerryError(
       'PERMISSION_DENIED',
       'ferry: clipboard read was blocked by the browser or denied by the user',
