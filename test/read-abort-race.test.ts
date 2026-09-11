@@ -11,10 +11,21 @@ const installHangingRead = () => {
       read: never,
     },
   });
+  // readImage/readFiles pre-check the asyncItems capability first
+  if (typeof globalThis.ClipboardItem === 'undefined') {
+    Object.defineProperty(globalThis, 'ClipboardItem', {
+      configurable: true,
+      value: class FakeClipboardItem {},
+    });
+  }
 };
 
 afterEach(() => {
   Object.defineProperty(globalThis.navigator, 'clipboard', {
+    configurable: true,
+    value: undefined,
+  });
+  Object.defineProperty(globalThis, 'ClipboardItem', {
     configurable: true,
     value: undefined,
   });
