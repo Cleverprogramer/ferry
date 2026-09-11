@@ -1,5 +1,11 @@
 # ferry
 
+## 0.7.0
+
+### Minor Changes
+
+- [#102](https://github.com/Cleverprogramer/ferry/pull/102) [`d5d14dc`](https://github.com/Cleverprogramer/ferry/commit/d5d14dc3f2718b937e55796d24672c5cc9f1ac32) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - readText, readImage, and readFiles now race the native clipboard read against the caller's AbortSignal, so reads reject the moment the signal fires instead of stalling until the native call settles. FerryError rejections from the read path are no longer masked as permission failures.
+
 ## 0.6.0
 
 ### Minor Changes
