@@ -5,7 +5,9 @@ description: Use this skill when writing ANY commit message in the ferry repo. P
 
 # Ferry Commit — commit conventions
 
-Commitlint (`@commitlint/config-conventional`) enforces these on `commit-msg`.
+Commitlint (repo config extends `@commitlint/config-conventional`) enforces
+these on `commit-msg` locally and through the CI `messages` job. Full rules
+and workflow: CONTRIBUTING.md.
 lint-staged runs `prettier --write` + `eslint --fix` on staged files during
 `pre-commit` — if it modifies files, `git add -A` and commit again.
 
@@ -25,6 +27,9 @@ lint-staged runs `prettier --write` + `eslint --fix` on staged files during
 - **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
   `build`, `ci`, `chore` (+ optional scope from the affected area, e.g.
   `feat(clipboard):`).
+- **Scopes:** prefer the repo list — `core`, `clipboard`, `react`, `vue`,
+  `svelte`, `playground`, `release`, `ci`, `deps`, `tests`, `size`, `agents`
+  (commitlint warns on anything else).
 - **Subject:** imperative mood, no trailing period, <= 72 chars.
 - **Body bullets:** one line each, <= 100 chars (commitlint
   `body-max-line-length` rejects longer lines — wrap or split into
@@ -33,6 +38,9 @@ lint-staged runs `prettier --write` + `eslint --fix` on staged files during
   closes on merge to `main`), `Refs #N` when it only partially advances it.
 - **One logical change per commit.** If the staged diff mixes unrelated
   changes, unstage and split first.
+- **CI validates everything:** the `messages` job runs the PR title through
+  semantic-pull-request and every branch commit through commitlint — a red
+  messages check blocks review, same as build/e2e.
 
 ## Ready-to-run command form
 

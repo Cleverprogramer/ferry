@@ -23,6 +23,14 @@ gh pr create --base main \
   --assignee Cleverprogramer
 ```
 
+## Template
+
+GitHub injects `.github/PULL_REQUEST_TEMPLATE.md` on new PRs — follow its
+section order (Summary → Type of Change → Changes → Commit map → Why →
+Related Issues → How to Test → Checklist). The CI `messages` job also
+validates the PR title is a conventional commit; the labels below drive the
+categorized auto-generated release notes (`.github/release.yml`).
+
 ## Body sections (in order)
 
 - `# <emoji> <type>(<scope>): <summary>` — title-style heading
@@ -40,7 +48,8 @@ gh pr create --base main \
 
 ## Labels
 
-- Type: `enhancement`, `bug`, `documentation`, `testing`
+- Type: `enhancement`, `bug`, `documentation`, `testing`, `performance`,
+  `infra`
 - Size (from commit count): `size/S` (1-3), `size/M` (4-8), `size/L` (9+)
 - Always add assignee `Cleverprogramer`
 
