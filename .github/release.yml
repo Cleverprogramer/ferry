@@ -1,0 +1,29 @@
+# Categories for the auto-generated release notes (gh release create
+# --generate-notes, run by the Release workflow's tag job). Categories match
+# the PR labels applied by the ferry-pr conventions.
+changelog:
+  exclude:
+    authors:
+      - github-actions
+  categories:
+    - title: 🚀 Features
+      labels:
+        - enhancement
+    - title: 🐛 Fixes
+      labels:
+        - bug
+    - title: 📚 Documentation
+      labels:
+        - documentation
+    - title: 🧪 Tests
+      labels:
+        - testing
+    - title: ⚡ Performance
+      labels:
+        - performance
+    - title: 🏗️ Infrastructure
+      labels:
+        - infra
+    - title: Other
+      labels:
+        - '*'

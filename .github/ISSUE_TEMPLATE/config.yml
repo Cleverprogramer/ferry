@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🎮 Live playground
+    url: https://cleverprogramer.github.io/ferry/
+    about: Reproduce issues against the demo — capabilities panel included
+  - name: 📖 API reference
+    url: https://github.com/Cleverprogramer/ferry#api
+    about: Check the README before filing
