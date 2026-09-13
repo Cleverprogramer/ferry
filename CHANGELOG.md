@@ -1,5 +1,11 @@
 # ferry
 
+## 0.8.0
+
+### Minor Changes
+
+- [#107](https://github.com/Cleverprogramer/ferry/pull/107) [`cf88282`](https://github.com/Cleverprogramer/ferry/commit/cf88282f2bd857970868582c840b2b7da2c678ed) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Add readHtml(options?): read the clipboard's text/html slot (rich paste) via clipboard.read(), mirroring readText. Rejects UNSUPPORTED without ClipboardItem support, INVALID_PAYLOAD when no html slot is present, and races the caller's AbortSignal mid-flight.
+
 ## 0.7.0
 
 ### Minor Changes
