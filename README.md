@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml/badge.svg)](https://github.com/Cleverprogramer/ferry/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3fb950.svg)](LICENSE)
-![Core bundle](https://img.shields.io/badge/core_gzipped-%3C2.8_kB-2f81f7)
+![Core bundle](https://img.shields.io/badge/core_gzipped-%3C3_kB-2f81f7)
 ![Zero dependencies](https://img.shields.io/badge/dependencies-0-3fb950)
 ![Tests](https://img.shields.io/badge/tests-85_unit_+_14_e2e-8957e5)
 
@@ -39,6 +39,7 @@ A tiny zero-dependency browser utility that ferries **text, rich HTML, JSON, ima
 | `copyToClipboard` rich slots (async `ClipboardItem`) | ✅ 76+ | ✅ 79+ | ⚠️ via fallback | ✅ 13.1+ |
 | `isSupported`, `clear`, `copyJson`, `copyElement` | ✅ | ✅ | ✅ | ✅ |
 | `readText` | ✅ 66+ | ✅ 79+ | ✅ 125+ | ✅ 13.1+ |
+| `readHtml` (text/html slot) | ✅ 76+ | ✅ 79+ | ⚠️ limited | ✅ 13.1+ |
 | `copyImage` / `readImage` (ClipboardItem) | ✅ 76+ | ✅ 79+ | ⚠️ limited | ✅ 13.1+ |
 | `readFiles` | ✅ 76+ | ✅ 79+ | ⚠️ limited | ⚠️ partial |
 | `timeout` / `retries` options | ✅ | ✅ | ✅ | ✅ |
@@ -143,6 +144,15 @@ Reads the clipboard's current text content. Rejects when reading is unsupported 
 
 ```ts
 const pasted = await readText({ signal: controller.signal });
+```
+
+### `readHtml(options?: ReadOptions): Promise<string>`
+
+Reads the clipboard's `text/html` slot (rich paste) — markup copied by ferry's rich path, or the HTML that browsers and docs apps place on the clipboard. Rejects with `UNSUPPORTED` where `ClipboardItem` is unavailable and `INVALID_PAYLOAD` when no html slot is present.
+
+```ts
+const markup = await readHtml();
+editor.insertHTML(markup);
 ```
 
 ### `readImage(options?: ReadOptions): Promise<Blob>`

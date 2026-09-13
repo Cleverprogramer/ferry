@@ -86,3 +86,11 @@ test.describe('capabilities panel', () => {
     await expect(page.locator('#caps-out')).toContainText('clipboard-write');
   });
 });
+
+test('readHtml surfaces the rich slot copied earlier', async ({ page }) => {
+  // seed the clipboard through the rich copy button, then read it back
+  await page.locator('button[data-act="copyRich"]').click();
+  await expect(page.locator('#outRich')).toContainText('copied');
+  await page.locator('button[data-act="readHtml"]').click();
+  await expect(page.locator('#outRead')).toContainText('html slot');
+});

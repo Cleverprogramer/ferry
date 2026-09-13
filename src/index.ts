@@ -233,6 +233,55 @@ export const readText = async (options: ReadOptions = {}): Promise<string> => {
 };
 
 /**
+ * Reads the clipboard's text/html slot (rich paste). Returns the markup
+ * copied by copyToClipboard's rich path, or the HTML that apps like
+ * browsers and docs editors place on the clipboard. Requires the async
+ * Clipboard API with ClipboardItem support; rejects with INVALID_PAYLOAD
+ * when no html slot is present.
+ */
+export const readHtml = async (options: ReadOptions = {}): Promise<string> => {
+  throwIfAborted(options.signal);
+
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.read !== 'function' ||
+    typeof ClipboardItem !== 'function'
+  ) {
+    throw new FerryError(
+      'UNSUPPORTED',
+      'ferry: reading rich HTML from the clipboard is not supported in this environment',
+    );
+  }
+
+  let items: ClipboardItem[];
+  try {
+    items = await raceAbort(navigator.clipboard.read(), options.signal);
+  } catch (err) {
+    if (err instanceof FerryError) throw err;
+    throw new FerryError(
+      'PERMISSION_DENIED',
+      'ferry: clipboard read was blocked by the browser or denied by the user',
+    );
+  }
+
+  const item = items[0];
+  if (!item || !item.types.includes('text/html')) {
+    throw new FerryError('INVALID_PAYLOAD', 'ferry: the clipboard has no text/html slot');
+  }
+
+  try {
+    const blob = await item.getType('text/html');
+    return await blob.text();
+  } catch (err) {
+    if (err instanceof FerryError) throw err;
+    throw new FerryError(
+      'PERMISSION_DENIED',
+      'ferry: the text/html slot could not be read from the clipboard',
+    );
+  }
+};
+
+/**
  * Copies an image to the clipboard via ClipboardItem.
  * Accepts an image Blob directly, or a URL string which is fetched and
  * converted to a Blob automatically. Rejects with a descriptive Error

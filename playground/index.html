@@ -56,8 +56,9 @@
   </section>
 
   <section>
-    <h2>📖 readText / readImage / readFiles</h2>
+    <h2>📖 readText / readHtml / readImage / readFiles</h2>
     <button data-act="readText" class="ghost">readText()</button>
+    <button data-act="readHtml" class="ghost">readHtml()</button>
     <button data-act="readImage" class="ghost">readImage()</button>
     <button data-act="readFiles" class="ghost">readFiles()</button>
     <div class="out" id="outRead"></div>
@@ -148,6 +149,10 @@
     async supported() { show('outJson', 'Ferry.isSupported() → ' + Ferry.isSupported()); },
     async readText() {
       try { show('outRead', await Ferry.readText()); }
+      catch (e) { err('outRead', e); }
+    },
+    async readHtml() {
+      try { show('outRead', '✔ html slot: ' + (await Ferry.readHtml())); }
       catch (e) { err('outRead', e); }
     },
     async readImage() {
