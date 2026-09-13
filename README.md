@@ -48,7 +48,17 @@ Every write falls back to the hidden-textarea `execCommand('copy')` path automat
 
 ## Install
 
-npm registry publishing is imminent — until it lands, install straight from GitHub:
+### npm
+
+```bash
+bun add ferry
+npm i ferry
+yarn add ferry
+```
+
+> **First publish (maintainers):** one-time setup on npmjs.com → package `ferry` → Trusted Publisher → owner `Cleverprogramer`, repo `ferry`, workflow `publish.yml`. Then run **Actions → Publish to npm** with the version from `package.json` — CI re-runs every gate and publishes with [provenance](https://docs.npmjs.com/generating-provenance-statements).
+
+### From GitHub
 
 ```bash
 bun add github:Cleverprogramer/ferry

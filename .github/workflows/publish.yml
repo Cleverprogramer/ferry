@@ -1,0 +1,56 @@
+name: Publish to npm
+
+# One-click publish of the current main version with npm provenance.
+#
+# One-time setup (package owner, on npmjs.com):
+#   package settings → Trusted Publisher →
+#     owner: Cleverprogramer, repo: ferry, workflow: publish.yml
+# Then run this workflow with the version input matching package.json.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish (must match package.json)
+        required: true
+
+permissions:
+  contents: write # publish the matching draft release
+  id-token: write # npm OIDC provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Verify version input
+        run: |
+          VERSION=$(bun -p "require('./package.json').version")
+          if [ "$VERSION" != "${{ inputs.version }}" ]; then
+            echo "input ${{ inputs.version }} != package.json $VERSION"
+            exit 1
+          fi
+          echo "publishing ferry@$VERSION"
+      - name: Unit tests
+        run: bun test
+      - name: Build
+        run: bun run build
+      - name: Bundle size budget
+        run: bun scripts/check-size.ts
+      - name: Package contents audit
+        run: bun scripts/check-package.ts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
+      - name: Publish the matching draft release
+        run: gh release edit "v$VERSION" --draft=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
