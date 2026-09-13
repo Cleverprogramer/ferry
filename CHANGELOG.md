@@ -1,5 +1,11 @@
 # ferry
 
+## 0.8.1
+
+### Patch Changes
+
+- [#110](https://github.com/Cleverprogramer/ferry/pull/110) [`f1f5073`](https://github.com/Cleverprogramer/ferry/commit/f1f5073a11b765aa5857117d9f65bb48571e773a) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Add a publish pipeline: a workflow_dispatch Publish to npm action that re-runs every gate (tests, build, size budget, tarball audit), publishes with npm OIDC provenance, and publishes the matching draft GitHub release. package.json gains publishConfig (public access).
+
 ## 0.8.0
 
 ### Minor Changes
