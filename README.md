@@ -184,12 +184,12 @@ for (const file of await readFiles()) {
 }
 ```
 
-### `clear(): Promise<void>`
+### `clear(options?: ReadOptions): Promise<void>`
 
-Overwrites the clipboard with an empty string. Rejects where the async Clipboard API is unavailable or denied.
+Overwrites the clipboard with an empty string. Rejects where the async Clipboard API is unavailable or denied; accepts `{ signal }` like every other API.
 
 ```ts
-await clear();
+await clear({ signal: controller.signal });
 ```
 
 ### `isSupported(): boolean`
