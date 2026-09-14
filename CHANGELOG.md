@@ -1,5 +1,11 @@
 # ferry
 
+## 0.9.0
+
+### Minor Changes
+
+- [#115](https://github.com/Cleverprogramer/ferry/pull/115) [`46e8330`](https://github.com/Cleverprogramer/ferry/commit/46e833080618fa015b8af093841a7c0876723d50) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - clear(options?) now accepts a ReadOptions object with a signal, matching the other write APIs: pre-aborted signals reject before touching the clipboard, and the native write races the signal mid-flight.
+
 ## 0.8.1
 
 ### Patch Changes
