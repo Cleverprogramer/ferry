@@ -1,5 +1,11 @@
 # ferry
 
+## 0.9.1
+
+### Patch Changes
+
+- [#117](https://github.com/Cleverprogramer/ferry/pull/117) [`d9ad8a8`](https://github.com/Cleverprogramer/ferry/commit/d9ad8a8f656b0ff09fd390150839959f042f507e) Thanks [@Cleverprogramer](https://github.com/Cleverprogramer)! - Ship external sourcemaps for every dist bundle (ESM, CJS, and the CDN global) so stack traces from the published package map back to the source. Tarball audit updated to expect the .map files.
+
 ## 0.9.0
 
 ### Minor Changes
