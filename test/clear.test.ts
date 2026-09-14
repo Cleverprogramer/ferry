@@ -45,3 +45,34 @@ describe('clear', () => {
     }
   });
 });
+
+describe('clear signal support', () => {
+  const setWrite = (value: unknown) => {
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      configurable: true,
+      value,
+    });
+  };
+
+  afterEach(() => setWrite(undefined));
+
+  it('rejects mid-flight when the signal fires', async () => {
+    setWrite({ writeText: () => new Promise(() => {}) });
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 30);
+    await expect(clear({ signal: controller.signal })).rejects.toThrow('the operation was aborted');
+  });
+
+  it('rejects before touching the clipboard when pre-aborted', async () => {
+    let calls = 0;
+    setWrite({
+      writeText: async () => {
+        calls++;
+      },
+    });
+    const controller = new AbortController();
+    controller.abort();
+    await expect(clear({ signal: controller.signal })).rejects.toThrow('aborted');
+    expect(calls).toBe(0);
+  });
+});

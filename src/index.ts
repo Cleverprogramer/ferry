@@ -371,7 +371,9 @@ export const copyImage = async (
  * Overwrites the clipboard with an empty string, effectively wiping it.
  * Requires the async Clipboard API; rejects where unavailable.
  */
-export const clear = async (): Promise<void> => {
+export const clear = async (options: ReadOptions = {}): Promise<void> => {
+  throwIfAborted(options.signal);
+
   if (typeof navigator === 'undefined' || typeof navigator.clipboard?.writeText !== 'function') {
     throw new FerryError(
       'UNSUPPORTED',
@@ -380,8 +382,9 @@ export const clear = async (): Promise<void> => {
   }
 
   try {
-    await navigator.clipboard.writeText('');
-  } catch {
+    await raceAbort(navigator.clipboard.writeText(''), options.signal);
+  } catch (err) {
+    if (err instanceof FerryError) throw err;
     throw new FerryError(
       'PERMISSION_DENIED',
       'ferry: the clipboard could not be cleared because the write was denied',
